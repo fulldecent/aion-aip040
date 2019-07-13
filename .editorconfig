@@ -1,0 +1,13 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+[*.java]
+indent_size = 2 # https://google.github.io/styleguide/javaguide.html#s4.2-block-indentation
+indent_style = space
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = false # https://google.github.io/styleguide/javaguide.html#s4.6.2-horizontal-whitespace
+continuation_indent_size = 4 # https://google.github.io/styleguide/javaguide.html#s4.5.2-line-wrapping-indent
