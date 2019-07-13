@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/fulldecent/aion-aip010.svg?branch=master)](https://travis-ci.org/fulldecent/aion-aip010)
+[![Build Status](https://travis-ci.com/fulldecent/aion-aip010.svg?branch=master)](https://travis-ci.com/fulldecent/aion-aip010)
 
 # :warning: PROJECT STATUS: Technology preview :warning:
 
