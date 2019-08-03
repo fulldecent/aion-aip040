@@ -1,8 +1,8 @@
-[![Build Status](https://travis-ci.com/fulldecent/aion-aip010.svg?branch=master)](https://travis-ci.com/fulldecent/aion-aip010)
+[![Build Status](https://travis-ci.com/fulldecent/aion-aip040.svg?branch=master)](https://travis-ci.com/fulldecent/aion-aip040)
 
 # :warning: PROJECT STATUS: Technology preview :warning:
 
-# ATS-010 Non-Fungible Token — Reference Implementation
+# ATS-040 Non-Fungible Token — Reference Implementation
 
 This project can be used directly to deploy non-fungible tokens on Aion AVM, and we recommend to use it as the starting point for Aion Java contracts which will incorporate/extend non-fungible functionality.
 

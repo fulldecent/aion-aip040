@@ -15,13 +15,13 @@ import java.math.BigInteger;
 //TODO: reformat this and all other files with Google Java convention
 
 /**
- * Reference implementation for the AIP-010 Non-Fungible Token Standard
+ * Reference implementation for the AIP-040 Non-Fungible Token Standard
  * 
- * It is intended that this class can be inherited for every implementation or extension of AIP-010.
+ * It is intended that this class can be inherited for every implementation or extension of AIP-040.
  * 
  * @author William Entriken
  */
-public class AIP010 {
+public class AIP040 {
 
 //TODO: that
 //region MOVE THESE TO STORAGE
@@ -56,17 +56,17 @@ private static int tokenGranularity;
 
     /**
      * This is called once during contract deployment
-     * @param tokenName This will be returned from aip010Name
-     * @param tokenSymbol This will be returned from aip010Symbol
-     * @param tokenUriBase This will be used in aip010TokenUri
+     * @param tokenName This will be returned from aip040Name
+     * @param tokenSymbol This will be returned from aip040Symbol
+     * @param tokenUriBase This will be used in aip040TokenUri
      */
     private static void deploy(String tokenName, String tokenSymbol, String tokenUriBase) {
         Blockchain.require(tokenName.length() > 0);
         Blockchain.require(tokenSymbol.length() > 0);
         Blockchain.require(tokenUriBase.length() > 0);
-        AIP010.tokenName = tokenName;
-        AIP010.tokenSymbol = tokenSymbol;
-        AIP010.tokenUriBase = tokenUriBase;
+        AIP040.tokenName = tokenName;
+        AIP040.tokenSymbol = tokenSymbol;
+        AIP040.tokenUriBase = tokenUriBase;
     }
 
     /**
@@ -75,10 +75,10 @@ private static int tokenGranularity;
      * @return The owner of the specified token
      */
     @Callable
-    public static Address aip010OwnerOf(byte[] tokenId) {
+    public static Address aip040OwnerOf(byte[] tokenId) {
         Blockchain.require(new BigInteger(tokenId).signum() >= 0);
 
-        byte[] key = AIP010KeyValueStorage.tokenOwnersMapKey(tokenId);
+        byte[] key = AIP040KeyValueStorage.tokenOwnersMapKey(tokenId);
         byte[] owner = Blockchain.getStorage(key);
         return new Address(owner);
 //TODO: confirm if returning null is allowed here or if we use the Null Object Pattern
@@ -91,9 +91,9 @@ private static int tokenGranularity;
      * @return The consignee of the specified token, or null if none is assigned
      */
     @Callable
-    public static Address aip010ConsigneeOf(byte[] tokenId) {
+    public static Address aip040ConsigneeOf(byte[] tokenId) {
         Blockchain.require(new BigInteger(tokenId).signum() >= 0);
-        byte[] key = AIP010KeyValueStorage.tokenConsigneeMapKey(tokenId);
+        byte[] key = AIP040KeyValueStorage.tokenConsigneeMapKey(tokenId);
         byte[] consignee = Blockchain.getStorage(key);
         return new Address(consignee);
 //TODO: confirm if returning null is allowed here or if we use the Null Object Pattern
@@ -106,8 +106,8 @@ private static int tokenGranularity;
      * @return True the authorization is action, false otherwise
      */
     @Callable
-    public static boolean aip010IsAuthorized(Address owner, Address authorizee) {
-        byte[] key = AIP010KeyValueStorage.accountAuthorizationMapKey(owner, authorizee);
+    public static boolean aip040IsAuthorized(Address owner, Address authorizee) {
+        byte[] key = AIP040KeyValueStorage.accountAuthorizationMapKey(owner, authorizee);
         byte[] isAuthorized = Blockchain.getStorage(key);
         return isAuthorized != null
                 ? true
@@ -120,9 +120,9 @@ private static int tokenGranularity;
      * @return A quantity of tokens owned by the specified owner
      */
     @Callable
-    public static byte[] aip010BalanceOf(Address owner) {
+    public static byte[] aip040BalanceOf(Address owner) {
 //TODO: if we are not using the Null Object Pattern then Address(0x0) is our special value and we need to throw an invalid input exception if this method is run on 0x0
-        byte[] key = AIP010KeyValueStorage.ownerBalanceMapKey(owner);
+        byte[] key = AIP040KeyValueStorage.ownerBalanceMapKey(owner);
         byte[] balance = Blockchain.getStorage(key);
         return balance != null
                 ? balance
@@ -138,34 +138,34 @@ private static int tokenGranularity;
      * @param tokenId A specific token to transfer, greater than or equal to zero
      */
     @Callable
-    public static void aip010Transfer(Address currentOwner, Address newOwner, byte[] tokenId) {
+    public static void aip040Transfer(Address currentOwner, Address newOwner, byte[] tokenId) {
 //TODO: this code assumes it is impossible for AVM to call this contract using NULL address values. Validate that assumption.
-        Blockchain.require(aip010OwnerOf(tokenId).equals(currentOwner));
+        Blockchain.require(aip040OwnerOf(tokenId).equals(currentOwner));
         Blockchain.require(
             Blockchain.getCaller().equals(currentOwner) ||
-            Blockchain.getCaller().equals(aip010ConsigneeOf(tokenId)) ||
-            aip010IsAuthorized(currentOwner, Blockchain.getCaller())
+            Blockchain.getCaller().equals(aip040ConsigneeOf(tokenId)) ||
+            aip040IsAuthorized(currentOwner, Blockchain.getCaller())
         );
 
-        byte[] fromBalance = Blockchain.getStorage(AIP010KeyValueStorage.ownerBalanceMapKey(currentOwner));
-        Blockchain.putStorage(AIP010KeyValueStorage.ownerBalanceMapKey(currentOwner),
+        byte[] fromBalance = Blockchain.getStorage(AIP040KeyValueStorage.ownerBalanceMapKey(currentOwner));
+        Blockchain.putStorage(AIP040KeyValueStorage.ownerBalanceMapKey(currentOwner),
             new BigInteger(fromBalance).subtract(BigInteger.valueOf(1)).toByteArray()
         );
 
-        byte[] toBalance = Blockchain.getStorage(AIP010KeyValueStorage.ownerBalanceMapKey(newOwner));
-        Blockchain.putStorage(AIP010KeyValueStorage.ownerBalanceMapKey(newOwner),
+        byte[] toBalance = Blockchain.getStorage(AIP040KeyValueStorage.ownerBalanceMapKey(newOwner));
+        Blockchain.putStorage(AIP040KeyValueStorage.ownerBalanceMapKey(newOwner),
             new BigInteger(toBalance).add(BigInteger.valueOf(1)).toByteArray()
         );
 
-        Blockchain.putStorage(AIP010KeyValueStorage.tokenOwnersMapKey(tokenId),
+        Blockchain.putStorage(AIP040KeyValueStorage.tokenOwnersMapKey(tokenId),
             newOwner.toByteArray()
         );
 
-        Blockchain.putStorage(AIP010KeyValueStorage.tokenConsigneeMapKey(tokenId),
+        Blockchain.putStorage(AIP040KeyValueStorage.tokenConsigneeMapKey(tokenId),
             null
         );
 
-        AIP010Events.AIP010Transferred(currentOwner, newOwner, new BigInteger(tokenId));
+        AIP040Events.AIP040Transferred(currentOwner, newOwner, new BigInteger(tokenId));
     }
 
 //TODO: should consignee be allowed to consign to another account? ERC-721 says no, but here says yes
@@ -176,19 +176,19 @@ private static int tokenGranularity;
      * @param tokenId A specific token to consign, greater than or equal to zero
      */
     @Callable
-    public static void aip010Consign(Address owner, Address consignee, byte[] tokenId) {
-        Blockchain.require(aip010OwnerOf(tokenId).equals(owner));
+    public static void aip040Consign(Address owner, Address consignee, byte[] tokenId) {
+        Blockchain.require(aip040OwnerOf(tokenId).equals(owner));
         Blockchain.require(
             Blockchain.getCaller().equals(owner) ||
-            Blockchain.getCaller().equals(aip010ConsigneeOf(tokenId)) ||
-            aip010IsAuthorized(owner, Blockchain.getCaller())
+            Blockchain.getCaller().equals(aip040ConsigneeOf(tokenId)) ||
+            aip040IsAuthorized(owner, Blockchain.getCaller())
         );
 
-        Blockchain.putStorage(AIP010KeyValueStorage.tokenConsigneeMapKey(tokenId),
+        Blockchain.putStorage(AIP040KeyValueStorage.tokenConsigneeMapKey(tokenId),
             consignee.toByteArray()
         );
 
-        AIP010Events.AIP010Consigned(owner, consignee, new BigInteger(tokenId));
+        AIP040Events.AIP040Consigned(owner, consignee, new BigInteger(tokenId));
     }
 
     /**
@@ -196,11 +196,11 @@ private static int tokenGranularity;
      * @param authorizee The account which receives authorization
      */
     @Callable
-    public static void aip010Authorize(Address authorizee) {
-        Blockchain.putStorage(AIP010KeyValueStorage.accountAuthorizationMapKey(Blockchain.getCaller(), authorizee),
+    public static void aip040Authorize(Address authorizee) {
+        Blockchain.putStorage(AIP040KeyValueStorage.accountAuthorizationMapKey(Blockchain.getCaller(), authorizee),
             BigInteger.valueOf(1).toByteArray()
         );
-        AIP010Events.AIP010Authorized(Blockchain.getCaller(), authorizee);
+        AIP040Events.AIP040Authorized(Blockchain.getCaller(), authorizee);
     }
     
     /**
@@ -208,11 +208,11 @@ private static int tokenGranularity;
      * @param authorizee The account which is revoked authorization
      */
     @Callable
-    public static void aip010Deauthorize(Address priorAuthorizee) {
-        Blockchain.putStorage(AIP010KeyValueStorage.accountAuthorizationMapKey(Blockchain.getCaller(), priorAuthorizee),
+    public static void aip040Deauthorize(Address priorAuthorizee) {
+        Blockchain.putStorage(AIP040KeyValueStorage.accountAuthorizationMapKey(Blockchain.getCaller(), priorAuthorizee),
             null
         );
-        AIP010Events.AIP010Authorized(Blockchain.getCaller(), priorAuthorizee);
+        AIP040Events.AIP040Authorized(Blockchain.getCaller(), priorAuthorizee);
     }
 
 //region Optional methods
@@ -222,7 +222,7 @@ private static int tokenGranularity;
      * @return A string representing the descriptive name
      */
     @Callable
-    public static String aip010Name() {
+    public static String aip040Name() {
         return tokenName;
     }
 
@@ -232,7 +232,7 @@ private static int tokenGranularity;
      * @return A string representing the brief name
      */
     @Callable
-    public static String aip010Symbol() {
+    public static String aip040Symbol() {
         return tokenSymbol;
     }
 
@@ -243,7 +243,7 @@ private static int tokenGranularity;
      * @return A string representing the brief name
      */
     @Callable
-    public static String aip010TokenURI(byte[] tokenId) {
+    public static String aip040TokenURI(byte[] tokenId) {
         return tokenUriBase + new BigInteger(tokenId).toString();
     }
 
@@ -253,8 +253,8 @@ private static int tokenGranularity;
      * @return A string representing the brief name
      */
     @Callable
-    public static byte[] aip010TotalSupply() {
-        byte[] totalSupply = Blockchain.getStorage(AIP010KeyValueStorage.totalSupplyKey());
+    public static byte[] aip040TotalSupply() {
+        byte[] totalSupply = Blockchain.getStorage(AIP040KeyValueStorage.totalSupplyKey());
         return totalSupply != null
                 ? totalSupply
                 : BigInteger.ZERO.toByteArray();
@@ -263,11 +263,11 @@ private static int tokenGranularity;
     /**
      * The n-th token identifier
      * @implSpec It is guaranteed that calling this function for every value -- 0 <= index < totalSupply -- against one specific block will enumerate every token
-     * @param index Which ordinal of token identifier you are seeking, 0 <= index < aip010TotalSupply
+     * @param index Which ordinal of token identifier you are seeking, 0 <= index < aip040TotalSupply
      * @return The token identifier for the n-th token in the list of all tokens
      */
     @Callable
-    public static byte[] aip010TokenByIndex(byte[] index) {
+    public static byte[] aip040TokenByIndex(byte[] index) {
 //TODO: implement this
         return new byte[] {};
     }
@@ -276,11 +276,11 @@ private static int tokenGranularity;
      * The n-th token identifier for a given account
      * @implSpec It is guaranteed that calling this function for every value -- 0 <= index < totalSupply -- against one specific block will enumerate every token
      * @param owner The account which you are interrogaating owned tokens
-     * @param index Which ordinal of token identifier you are seeking, 0 <= index < aip010BalanceOf(owner)
+     * @param index Which ordinal of token identifier you are seeking, 0 <= index < aip040BalanceOf(owner)
      * @return The token identifier for the n-th token in the list of all tokens
      */
     @Callable
-    public static byte[] aip010TokenOfOwnerByIndex(Address owner, byte[] index) {
+    public static byte[] aip040TokenOfOwnerByIndex(Address owner, byte[] index) {
 //TODO: implement this
         return new byte[] {};
     }
@@ -302,28 +302,28 @@ private static int tokenGranularity;
     public static void mint(Address newOwner, byte[] tokenId) {
 //TODO: this code assumes it is impossible for AVM to call this contract using NULL address values. Validate that assumption.
         Blockchain.require(new BigInteger(tokenId).signum() >= 0);
-//TODO: this assumes aip010OwnerOf is allowed to return null, doubleczech that        
-        Blockchain.require(aip010OwnerOf(tokenId).equals(null));
+//TODO: this assumes aip040OwnerOf is allowed to return null, doubleczech that        
+        Blockchain.require(aip040OwnerOf(tokenId).equals(null));
 
-        byte[] toBalance = Blockchain.getStorage(AIP010KeyValueStorage.ownerBalanceMapKey(newOwner));
-        Blockchain.putStorage(AIP010KeyValueStorage.ownerBalanceMapKey(newOwner),
+        byte[] toBalance = Blockchain.getStorage(AIP040KeyValueStorage.ownerBalanceMapKey(newOwner));
+        Blockchain.putStorage(AIP040KeyValueStorage.ownerBalanceMapKey(newOwner),
             new BigInteger(toBalance).add(BigInteger.valueOf(1)).toByteArray()
         );
 
-        byte[] totalSupply = Blockchain.getStorage(AIP010KeyValueStorage.totalSupplyKey());
-        Blockchain.putStorage(AIP010KeyValueStorage.totalSupplyKey(),
+        byte[] totalSupply = Blockchain.getStorage(AIP040KeyValueStorage.totalSupplyKey());
+        Blockchain.putStorage(AIP040KeyValueStorage.totalSupplyKey(),
             new BigInteger(totalSupply).add(BigInteger.valueOf(1)).toByteArray()
         );
 
-        Blockchain.putStorage(AIP010KeyValueStorage.tokenOwnersMapKey(tokenId),
+        Blockchain.putStorage(AIP040KeyValueStorage.tokenOwnersMapKey(tokenId),
             newOwner.toByteArray()
         );
 
-        Blockchain.putStorage(AIP010KeyValueStorage.tokenConsigneeMapKey(tokenId),
+        Blockchain.putStorage(AIP040KeyValueStorage.tokenConsigneeMapKey(tokenId),
             null
         );
 
-        AIP010Events.AIP010Transferred(null, newOwner, new BigInteger(tokenId));
+        AIP040Events.AIP040Transferred(null, newOwner, new BigInteger(tokenId));
     }
 
 //endsection

@@ -21,7 +21,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 
-public class AIP010Test {
+public class AIP040Test {
     @Rule
     public AvmRule avmRule = new AvmRule(true);
 
@@ -36,29 +36,29 @@ public class AIP010Test {
 
     @Before
     public void deployDapp() {
-        byte[] data = AIP010Encoder.deploy(tokenName, tokenSymbol, tokenUriBase);
-        byte[] contractData = avmRule.getDappBytes(AIP010.class, data, AIP010Events.class, AIP010KeyValueStorage.class);
+        byte[] data = AIP040Encoder.deploy(tokenName, tokenSymbol, tokenUriBase);
+        byte[] contractData = avmRule.getDappBytes(AIP040.class, data, AIP040Events.class, AIP040KeyValueStorage.class);
         contractAddress = avmRule.deploy(deployer, BigInteger.ZERO, contractData).getDappAddress();
     }
 
     @Test
     public void testInitialization() {
-        byte[] data = AIP010Encoder.aip010Name();
+        byte[] data = AIP040Encoder.aip040Name();
         AvmRule.ResultWrapper result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, data);
         String resStr = (String) result.getDecodedReturnData();
         Assert.assertTrue(resStr.equals("JENNIJUJU"));
 
-        data = AIP010Encoder.aip010Symbol();
+        data = AIP040Encoder.aip040Symbol();
         result = avmRule.call(deployer,contractAddress, BigInteger.ZERO, data);
         resStr = (String) result.getDecodedReturnData();
         Assert.assertTrue(resStr.equals("J3N"));
 
-        data = AIP010Encoder.aip010TotalSupply();
+        data = AIP040Encoder.aip040TotalSupply();
         result = avmRule.call(deployer,contractAddress, BigInteger.ZERO, data);
         byte[] resBytes = (byte[]) result.getDecodedReturnData();
         Assert.assertTrue(new BigInteger(resBytes).equals(BigInteger.ZERO));
 
-        data = AIP010Encoder.aip010BalanceOf(deployer);
+        data = AIP040Encoder.aip040BalanceOf(deployer);
         result = avmRule.call(deployer,contractAddress, BigInteger.ZERO, data);
         resBytes = (byte[]) result.getDecodedReturnData();
         Assert.assertTrue(new BigInteger(resBytes).equals(BigInteger.ZERO));
@@ -71,7 +71,7 @@ public class AIP010Test {
     @Test
     public void testGetBalanceOfNone() {
         ABIStreamingEncoder encoder = new ABIStreamingEncoder();
-        AvmRule.ResultWrapper result = avmRule.call(deployer,contractAddress, BigInteger.ZERO, encoder.encodeOneString("aip010BalanceOf").encodeOneAddress(avmRule.getRandomAddress(BigInteger.ZERO)).toBytes());
+        AvmRule.ResultWrapper result = avmRule.call(deployer,contractAddress, BigInteger.ZERO, encoder.encodeOneString("aip040BalanceOf").encodeOneAddress(avmRule.getRandomAddress(BigInteger.ZERO)).toBytes());
         byte[] resBytes = (byte[]) result.getDecodedReturnData();
         System.out.println(new BigInteger(resBytes));
         Assert.assertTrue(new BigInteger(resBytes).compareTo(BigInteger.ZERO) == 0 );

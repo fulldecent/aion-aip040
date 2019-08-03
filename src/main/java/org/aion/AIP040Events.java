@@ -4,7 +4,7 @@ import avm.Address;
 import avm.Blockchain;
 import java.math.BigInteger;
 
-public class AIP010Events {
+public class AIP040Events {
 
 //TODO: don't need BIGINTEGER_LENGTH remove it, this contract allows integers of any size. If we SHOULD use 32 bytes, then let's reference authoritative documentation
 //    private static int BIGINTEGER_LENGTH = 32;
@@ -16,10 +16,10 @@ public class AIP010Events {
      * @param newOwner The account that is the owner of the token after the traansfer (or null if token is being destroyed)
      * @param tokenId The identifier for the token which is being transferred, created or destroyed
      */
-    protected static void AIP010Transferred(Address priorOwner, Address newOwner, BigInteger tokenId) {
-//TODO: study if the best practice is to use simple event names like this or using fully qualified names like org.aion.   AIP010Events.AIP010Transferred
+    protected static void AIP040Transferred(Address priorOwner, Address newOwner, BigInteger tokenId) {
+//TODO: study if the best practice is to use simple event names like this or using fully qualified names like org.aion.   AIP040Events.AIP040Transferred
 //TODO: can Java do something like __FUNCTION__ here and if so should we?
-        Blockchain.log("AIP010Transferred".getBytes(),
+        Blockchain.log("AIP040Transferred".getBytes(),
                 priorOwner.toByteArray(),
                 newOwner.toByteArray(),
                 tokenId.toByteArray(),
@@ -34,8 +34,8 @@ public class AIP010Events {
      * @param consignee The consignee being assigned to the token (or null if consignement is being revoked)
      * @param tokenId The identifier for the token which is being consigned (or revoking consignment)
      */
-    protected static void AIP010Consigned(Address owner, Address consignee, BigInteger tokenId) {
-        Blockchain.log("AIP010Consigned".getBytes(),
+    protected static void AIP040Consigned(Address owner, Address consignee, BigInteger tokenId) {
+        Blockchain.log("AIP040Consigned".getBytes(),
                 owner.toByteArray(),
                 consignee.toByteArray(),
                 tokenId.toByteArray(),
@@ -47,8 +47,8 @@ public class AIP010Events {
      * @param account The account which will delegate authorization to another account
      * @param authorizee The account which receives the authorization
      */
-    protected static void AIP010Authorized(Address account, Address authorizee) {
-        Blockchain.log("AIP010Authorized".getBytes(),
+    protected static void AIP040Authorized(Address account, Address authorizee) {
+        Blockchain.log("AIP040Authorized".getBytes(),
                 account.toByteArray(),
                 authorizee.toByteArray(),
                 new byte[0]);
@@ -59,8 +59,8 @@ public class AIP010Events {
      * @param account The account which will revoke authorization to another account
      * @param authorizee The account which loses the authorization
      */
-    protected static void AIP010Deauthorized(Address account, Address priorAuthorizee) {
-        Blockchain.log("AIP010Deauthorized".getBytes(),
+    protected static void AIP040Deauthorized(Address account, Address priorAuthorizee) {
+        Blockchain.log("AIP040Deauthorized".getBytes(),
                 account.toByteArray(),
                 priorAuthorizee.toByteArray(),
                 new byte[0]);
