@@ -34,7 +34,7 @@ public class NFTokenTest {
     @Before
     public void deployDapp() {
         byte[] data = MainEncoder.deploy(tokenName, tokenSymbol, tokenUriBase);
-        byte[] contractData = avmRule.getDappBytes(Main.class, data, AIP040Events.class, NFToken.class, NFTokenMock.class, NFTokenStorage.class);
+        byte[] contractData = avmRule.getDappBytes(Main.class, data, AIP040Events.class, NFToken.class, NFTokenMock.class, NFTokenStorage.class, BigInteger.class);
         contractAddress = avmRule.deploy(deployer, BigInteger.ZERO, contractData).getDappAddress();
     }
 
