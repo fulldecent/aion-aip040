@@ -50,6 +50,7 @@ TODO: add notes about Java subclassing/interfaces (with default implementations)
   * Oracle style guide for doc comments https://www.oracle.com/technetwork/java/javase/documentation/index-137868.html#styleguide
     * ["Include tags in the following order"](https://www.oracle.com/technetwork/java/javase/documentation/index-137868.html#orderoftags)
     * Whether to use full sentences in documentation
+* Aion supports JDK version 11 https://docs.aion.network/docs/environment-variables
 
 - Best practice for Java+Maven+JUnit project layout https://github.com/junit-team/junit5-samples/tree/master/junit5-jupiter-starter-maven
 
