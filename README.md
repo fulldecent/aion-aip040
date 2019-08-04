@@ -50,6 +50,8 @@ TODO: add notes about Java subclassing/interfaces (with default implementations)
   * Oracle style guide for doc comments https://www.oracle.com/technetwork/java/javase/documentation/index-137868.html#styleguide
     * ["Include tags in the following order"](https://www.oracle.com/technetwork/java/javase/documentation/index-137868.html#orderoftags)
     * Whether to use full sentences in documentation
+  * Minimal requirements from https://github.com/aionnetwork/aion/wiki/Aion-Code-Conventions
+  * Not required by Aion, but adoption function naming requirements from https://google.github.io/styleguide/javaguide.html
 * Which version of dependencies we should support
   * Aion supports JDK version 11 https://docs.aion.network/docs/environment-variables
   * Java versions supported by vendor https://www.oracle.com/technetwork/java/java-se-support-roadmap.html
@@ -61,8 +63,6 @@ TODO: add notes about Java subclassing/interfaces (with default implementations)
 - 
 
 - How to remove Maven initialization errors https://stackoverflow.com/questions/4123044/maven-3-warnings-about-build-plugins-plugin-version
-
-- Code style shall follow [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html) as specified in [Aion Code Conventions](https://github.com/aionnetwork/aion/wiki/Aion-Code-Conventions)
 
 - Gitignore from https://github.com/github/gitignore/blob/master/Maven.gitignore
 
