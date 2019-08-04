@@ -53,6 +53,8 @@ TODO: add notes about Java subclassing/interfaces (with default implementations)
 * Which version of dependencies we should support
   * Aion supports JDK version 11 https://docs.aion.network/docs/environment-variables
   * Java versions supported by vendor https://www.oracle.com/technetwork/java/java-se-support-roadmap.html
+* Aion protocol design
+  * Yes, `null` can be passed in the ABI https://github.com/aionnetwork/AVM/blob/master/org.aion.avm.userlib/src/org/aion/avm/userlib/abi/ABIEncoder.java#L387-L390
 
 - Best practice for Java+Maven+JUnit project layout https://github.com/junit-team/junit5-samples/tree/master/junit5-jupiter-starter-maven
 
