@@ -7,7 +7,7 @@ import java.util.Arrays;
 /**
  * The methods in this class are fully described by <code>StorageSlots</code>
  * and the comments there. In the future, tooling may automatically generate
- * this file from that.
+ * this class from that specification.
  * 
  * Every method directly gets and puts to storage, which is initially null. So,
  * methods not documented per https://google.github.io/styleguide/javaguide.html#s7.3.1-javadoc-exception-self-explanatory
@@ -21,11 +21,13 @@ public class NFTokenStorage {
     protected enum StorageSlots {
         TOKEN_NAME, // () => String
         TOKEN_SYMBOL, // () => String
-        TOKEN_URI_BASE, // () => String
+        TOKEN_URI_PREFIX, // () => String
+        TOKEN_URI_POSTFIX, // () => String
         TOTAL_SUPPLY, // () => BigInteger
 
         TOKENS_ARRAY, // (BigInteger) => BigInteger
         TOKEN_OWNERS_MAP, // (BigInteger) => Address
+        TOKEN_LOCATION_MAP, // (BigInteger) => BigInteger
         TOKEN_CONSIGNEE_MAP, // (BigInteger) => Address
         ACCOUNT_AUTHORIZATION_MAP, // (Address, Address) => Boolean
         OWNER_BALANCE_MAP, // (Address) => BigInteger
@@ -48,12 +50,20 @@ public class NFTokenStorage {
         AVMBlockchainWrapper.putStorage​(symbol.getBytes(), StorageSlots.TOKEN_SYMBOL);
     }
 
-    protected static String getTokenUriBase() {
-        return new String(AVMBlockchainWrapper.getStorage​(StorageSlots.TOKEN_URI_BASE));
+    protected static String getTokenUriPrefix() {
+        return new String(AVMBlockchainWrapper.getStorage​(StorageSlots.TOKEN_URI_PREFIX));
     }
 
-    protected static void putTokenUriBase(String uriBase) {
-        AVMBlockchainWrapper.putStorage​(uriBase.getBytes(), StorageSlots.TOKEN_URI_BASE);
+    protected static void putTokenUriPrefix(String uriPrefix) {
+        AVMBlockchainWrapper.putStorage​(uriPrefix.getBytes(), StorageSlots.TOKEN_URI_PREFIX);
+    }
+
+    protected static String getTokenUriPostfix() {
+        return new String(AVMBlockchainWrapper.getStorage​(StorageSlots.TOKEN_URI_POSTFIX));
+    }
+
+    protected static void putTokenUriPostfix(String uriPostfix) {
+        AVMBlockchainWrapper.putStorage​(uriPostfix.getBytes(), StorageSlots.TOKEN_URI_POSTFIX);
     }
 
     protected static BigInteger getTotalSupply() {
@@ -78,6 +88,14 @@ public class NFTokenStorage {
 
     protected static void putTokenOwner(BigInteger tokenId, Address owner) {
         AVMBlockchainWrapper.putStorage​(owner.toByteArray(), StorageSlots.TOKEN_OWNERS_MAP, tokenId.toByteArray());
+    }
+
+    protected static BigInteger getTokenLocation(BigInteger tokenId) {
+        return new BigInteger(AVMBlockchainWrapper.getStorage​(StorageSlots.TOKEN_LOCATION_MAP, tokenId.toByteArray()));
+    }
+
+    protected static void putTokenLocation(BigInteger tokenId, BigInteger location) {
+        AVMBlockchainWrapper.putStorage​(location.toByteArray(), StorageSlots.TOKEN_LOCATION_MAP, tokenId.toByteArray());
     }
 
     protected static Address getTokenConsignee(BigInteger tokenId) {

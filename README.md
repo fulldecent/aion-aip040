@@ -2,9 +2,9 @@
 
 # :warning: PROJECT STATUS: Technology preview :warning:
 
-# ATS-040 Non-Fungible Token — Reference Implementation
+# AIP-040 Non-Fungible Token — Reference Implementation
 
-This project can be used directly to deploy non-fungible tokens on Aion AVM, and we recommend to use it as the starting point for Aion Java contracts which will incorporate/extend non-fungible functionality.
+This project can be used directly to deploy non-fungible tokens on Aion AVM, and we recommend to use the `NFToken` class as the starting point for every Aion Java contract which will incorporate/extend non-fungible functionality.
 
 ## Prerequisites
 
@@ -40,39 +40,40 @@ After you have made any changes, run the build and test command above.
 
 ## Extending
 
-TODO: add notes about Java subclassing/interfaces (with default implementations) and mixins
+If you will extend the functionality of the token implementation, for example to add pausing, extend the provided implementation.
 
-
+To incorporate non-fungible tokens into your contract, which may have other features, copy the AIP-040 boilerplate code from the provided `Main.java`.
 
 ## References
 
 * Style, comments
   * Oracle style guide for doc comments https://www.oracle.com/technetwork/java/javase/documentation/index-137868.html#styleguide
+    * What words to capitalize (refer examples), when to use periods and full sentences
     * ["Include tags in the following order"](https://www.oracle.com/technetwork/java/javase/documentation/index-137868.html#orderoftags)
-    * Whether to use full sentences in documentation
+    * Align text to columns
   * Minimal requirements from https://github.com/aionnetwork/aion/wiki/Aion-Code-Conventions
-  * Not required by Aion, but adoption function naming requirements from https://google.github.io/styleguide/javaguide.html
+  * Not required by Aion, but adopting function naming requirements from https://google.github.io/styleguide/javaguide.html
 * Which version of dependencies we should support
   * Aion supports JDK version 11 https://docs.aion.network/docs/environment-variables
   * Java versions supported by vendor https://www.oracle.com/technetwork/java/java-se-support-roadmap.html
 * Aion protocol design
   * Yes, `null` can be passed in the ABI https://github.com/aionnetwork/AVM/blob/master/org.aion.avm.userlib/src/org/aion/avm/userlib/abi/ABIEncoder.java#L387-L390
 
-- Best practice for Java+Maven+JUnit project layout https://github.com/junit-team/junit5-samples/tree/master/junit5-jupiter-starter-maven
-
-- 
-
-- How to remove Maven initialization errors https://stackoverflow.com/questions/4123044/maven-3-warnings-about-build-plugins-plugin-version
-
+- Setting up a Java + Maven + JUnit + Aion project layout
+  - Best practice for Java+Maven+JUnit project layout https://github.com/junit-team/junit5-samples/tree/master/junit5-jupiter-starter-maven
+  - How to remove Maven initialization errors https://stackoverflow.com/questions/4123044/maven-3-warnings-about-build-plugins-plugin-version
 - Gitignore from https://github.com/github/gitignore/blob/master/Maven.gitignore
+- Editorconfig is included and some rules are referenced to Google Java Style Guide
 
-- Editorconfig is included and individual rules are referenced to Google Java Style Guide
+## Maintenance
 
-- 1. Periodically update to the most recent version, to obtain the latest bug fixes and new features:
+- Periodically update to the most recent version, to obtain the latest bug fixes and new features:
 
-     ```
-       mvn versions:use-latest-versions -Dincludes="org.checkerframework:*"
-     ```
+  ```sh
+  mvn versions:use-latest-versions -Dincludes="org.checkerframework:*"
+  ```
+
+* Periodically update mvnw if necessary. We recognize upstream as https://github.com/takari/maven-wrapper
 
 ## License
 

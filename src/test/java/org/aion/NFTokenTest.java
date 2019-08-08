@@ -59,7 +59,7 @@ public class NFTokenTest {
         byte[] resBytes = (byte[]) result.getDecodedReturnData();
         Assert.assertTrue(new BigInteger(resBytes).equals(BigInteger.ZERO));
 
-        callData = AIP040Encoder.aip040BalanceOf(deployer);
+        callData = AIP040Encoder.aip040OwnerBalance(deployer);
         result = avmRule.call(deployer,contractAddress, BigInteger.ZERO, callData);
         resBytes = (byte[]) result.getDecodedReturnData();
         Assert.assertTrue(new BigInteger(resBytes).equals(BigInteger.ZERO));
