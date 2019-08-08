@@ -27,7 +27,7 @@ Prepare your Maven project build state
 Build and test
 
 ```sh
-./mvnw clean install verify
+./mvnw clean install
 ```
 
 A build which passes all tests will be indicated by:
