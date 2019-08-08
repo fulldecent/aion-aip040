@@ -2,11 +2,12 @@ package org.aion;
 
 import org.aion.avm.userlib.AionBuffer;
 import avm.Blockchain;
+import org.aion.avm.userlib.abi.ABIException;
 
 /**
- * We assert that putStorage​(byte[] key, byte[] value) and
- * getStorage(byte[] key) shoud be avoided because their method signatures
- * encourage two unsafe practices:
+ * We assert that <code>putStorage(byte[] key, byte[] value)</code> and
+ * <code>getStorage(byte[] key)</code> should be avoided because their method
+ * signatures encourage two unsafe practices:
  * 
  * 1. Key injection -- when the end user can directly choose a key for storage,
  *    possibly colliding this keys used for other purposes
@@ -25,10 +26,10 @@ public class AVMBlockchainWrapper {
 
     /**
      * Gets a value from the key-value store of the current account at the key
-     * location described by <code>realm</code> and <code>keyPath</code>
+     * location described by <code>realm</code> and <code>keyPath</code>.
      * 
-     * @param realm An enum constant which qualifies the key path
-     * @param keyPath An array which, along with the <code>realm</code>, fully
+     * @param realm   an enum constant which qualifies the key path
+     * @param keyPath an array which, along with the <code>realm</code>, fully
      *                qualifies the storage location
      */
     public static byte[] getStorage​(Enum realm, byte[]... keyPath) {
@@ -40,11 +41,11 @@ public class AVMBlockchainWrapper {
     /**
      * Stores <code>value</code> into the key-value store of the current account
      * at the key location described by <code>realm</code> and
-     * <code>keyPath</code>
+     * <code>keyPath</code>.
      * 
-     * @param value What will be stored
-     * @param realm An enum constant which qualifies the key path
-     * @param keyPath An array which, along with the <code>realm</code>, fully
+     * @param value   what will be stored
+     * @param realm   an enum constant which qualifies the key path
+     * @param keyPath an array which, along with the <code>realm</code>, fully
      *                qualifies the storage location
      */
     public static void putStorage​(byte[] value, Enum realm, byte[]... keyPath) {
@@ -53,28 +54,35 @@ public class AVMBlockchainWrapper {
         Blockchain.putStorage(storageKey, value);
     }
 
+    // Using approach from org.aion.avm.userlib/src/org/aion/avm/userlib/abi/ABIStreamingEncoder.java
+    private static void checkLengthIsAShort(int size) {
+        if (size > Short.MAX_VALUE) {
+            throw new ABIException("Array length must fit in 2 bytes");
+        }
+    }
+
     /**
      * Injectively converts a fully qualified realm and key path into a byte
-     * array
+     * array.
      * 
-     * @param realm An enum constant which qualifies the key path
-     * @param keyPath An array of byte arrays
-     * @return A byte array which uniquely represents the (<code>realm</code>, 
-     *         <code>keyPath</code>) pair 
+     * @param  realm   an enum constant which qualifies the key path
+     * @param  keyPath an array of byte arrays
+     * @return         a byte array which uniquely represents the
+     *                 (<code>realm</code>, <code>keyPath</code>) pair 
      */
     private static byte[] serializeRealmAndKey(Enum realm, byte[][] keyPath) {
-        //TODO: review code at https://github.com/aionnetwork/AVM/blob/master/org.aion.avm.userlib/src/org/aion/avm/userlib/abi/ABIStreamingEncoder.java#L957 and possibly reuse that for consistency
         int outputSize = Integer.BYTES;
         for (byte[] keyPathItem : keyPath) {
-            //TODO: Add reference to AVM specification that arrays length can never exceed Integer.MAX_VALUE
-            outputSize += Integer.BYTES + keyPathItem.length;
+            checkLengthIsAShort(keyPathItem.length);
+            outputSize += Short.BYTES + keyPathItem.length;
         }
 
         AionBuffer buffer = AionBuffer.allocate(outputSize);
         //TODO: Add reference to AVM specification that hashCodes will never collide
+        //TODO: is it specified that all hashcodes would fit in a short?
         buffer.putInt(realm.hashCode());
         for (byte[] keyPathItem : keyPath) {
-            buffer.putInt(keyPathItem.length); // because [[a], [b]] ± [[a, b]]
+            buffer.putShort((short) keyPathItem.length); // because [[a], [b]] ± [[a, b]]
             buffer.put(keyPathItem);
         }
         return buffer.getArray();

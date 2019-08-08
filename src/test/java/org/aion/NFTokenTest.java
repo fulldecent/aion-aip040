@@ -5,7 +5,6 @@ import org.aion.avm.core.util.LogSizeUtils;
 import org.aion.avm.tooling.AvmRule;
 
 import org.aion.avm.userlib.AionBuffer;
-//import org.aion.avm.userlib.abi.ABIStreamingEncoder;
 import org.aion.vm.api.interfaces.IExecutionLog;
 import org.aion.vm.api.interfaces.ResultCode;
 //TODO: fx this next line, it is not best practice
