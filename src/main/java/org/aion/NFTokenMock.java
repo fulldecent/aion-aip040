@@ -15,7 +15,7 @@ public class NFTokenMock extends NFToken {
      * This could be called once during contract deployment.
      * 
      * @implNote                 It is not expected that this will be exposed as
-     *                           a callable function. So no encoder is provided
+     *                           a callable method. So no encoder is provided
      *                           in <code>NFTokenMockEncoder</code>
      * @param    tokenName       this will be returned from aip040Name
      * @param    tokenSymbol     this will be returned from aip040Symbol

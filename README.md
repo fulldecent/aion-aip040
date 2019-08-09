@@ -43,7 +43,7 @@ After you have made any changes, run the build and test command above.
 ## Overview
 
 * `AVMBlockchainWrapper` is a wrapper around the current AVM storage API.
-* `AIP040Encoder` is an encoder for any contract to interrogate any AIP-040 contract, use this to make type safe function calls which it converts to ABI encoded, wire-ready bytecode.
+* `AIP040Encoder` is an encoder for any contract to interrogate any AIP-040 contract, use this to make type safe method calls which it converts to ABI encoded, wire-ready bytecode.
 * `AIP040Events` is an output encoder for any AIP-040 contract to emit events, use this to pass type safe calls which it directly logs to the blockchain.
 * `NFToken{,Storage}` are a base class and storage details for implementing the standardized AIP-040 behavior.
 * `NFTokenMock{,Encoder}` are a useful implementation and encoder which has additional functionality which we believe many people will want, but which is not standardized.
@@ -69,7 +69,7 @@ To incorporate non-fungible tokens into your contract, which may have other feat
     * ["Include tags in the following order"](https://www.oracle.com/technetwork/java/javase/documentation/index-137868.html#orderoftags)
     * Align text to columns
   * Minimal requirements from https://github.com/aionnetwork/aion/wiki/Aion-Code-Conventions
-  * Not required by Aion, but adopting function naming requirements from https://google.github.io/styleguide/javaguide.html
+  * Not required by Aion, but adopting method naming requirements from https://google.github.io/styleguide/javaguide.html
 * Which version of dependencies we should support
   * Aion supports JDK version 11 https://docs.aion.network/docs/environment-variables
   * Java versions supported by vendor https://www.oracle.com/technetwork/java/java-se-support-roadmap.html
