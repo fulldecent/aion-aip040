@@ -90,6 +90,7 @@ To incorporate non-fungible tokens into your contract, which may have other feat
   ```
 
 * Periodically update mvnw if necessary. We recognize upstream as https://github.com/takari/maven-wrapper
+* Periodically review AVM and other Maven dependencies and update if necessary. TODO: document how to do this.
 
 ## License
 
