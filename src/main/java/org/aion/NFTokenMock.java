@@ -14,11 +14,15 @@ public class NFTokenMock extends NFToken {
     /**
      * This could be called once during contract deployment.
      * 
-     * @param tokenName       this will be returned from aip040Name
-     * @param tokenSymbol     this will be returned from aip040Symbol
-     * @param tokenUriPrefix  this will be used in aip040TokenUri
-     * @param tokenUriPostfix this will be used in aip040TokenUri
+     * @implNote                 It is not expected that this will be exposed as
+     *                           a callable function. So no encoder is provided
+     *                           in <code>NFTokenMockEncoder</code>
+     * @param    tokenName       this will be returned from aip040Name
+     * @param    tokenSymbol     this will be returned from aip040Symbol
+     * @param    tokenUriPrefix  this will be used in aip040TokenUri
+     * @param    tokenUriPostfix this will be used in aip040TokenUri
      */
+    // @NotCallable
     public static void setTokenNameSymbolAndUriAffixes(String tokenName, String tokenSymbol, String uriPrefix, String uriPostfix) {
         Blockchain.require(tokenName != null);
         Blockchain.require(tokenSymbol != null);

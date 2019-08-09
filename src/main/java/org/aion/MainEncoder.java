@@ -12,11 +12,12 @@ import org.aion.avm.userlib.abi.ABIStreamingEncoder;
  */
 public class MainEncoder {
 //TODO: what should this function be named?
-    public static byte[] deploy(String tokenName, String tokenSymbol, String tokenUriBase) {
+    public static byte[] deploy(String tokenName, String tokenSymbol, String tokenUriPrefix, String tokenUriPostfix) {
         return new ABIStreamingEncoder()
             .encodeOneString(tokenName)
             .encodeOneString(tokenSymbol)
-            .encodeOneString(tokenUriBase)
+            .encodeOneString(tokenUriPrefix)
+            .encodeOneString(tokenUriPostfix)
             .toBytes();
     }
 }
