@@ -70,6 +70,7 @@ To incorporate non-fungible tokens into your contract, which may have other feat
     * Align text to columns
   * Minimal requirements from https://github.com/aionnetwork/aion/wiki/Aion-Code-Conventions
   * Not required by Aion, but adopting method naming requirements from https://google.github.io/styleguide/javaguide.html
+  * Code reuse pattern for separating an interface specification, a reference implementation, usage demonstrations, testing subjects and other tools. https://github.com/0xcert/ethereum-erc721#structure
 * Which version of dependencies we should support
   * Aion supports JDK version 11 https://docs.aion.network/docs/environment-variables
   * Java versions supported by vendor https://www.oracle.com/technetwork/java/java-se-support-roadmap.html
