@@ -6,6 +6,8 @@
 
 This project can be used directly to deploy non-fungible tokens on Aion AVM, and we recommend to use the `NFToken` class as the starting point for every Aion Java contract which will incorporate/extend non-fungible functionality.
 
+⚠️ This implementation imports a pre-release version of the AVM userlib to allow using the `java.math.BigInteger` type. 
+
 ## Prerequisites
 
 1. Supported operating systems are macOS, Linux and Windows
@@ -90,7 +92,7 @@ To incorporate non-fungible tokens into your contract, which may have other feat
   ```
 
 * Periodically update mvnw if necessary. We recognize upstream as https://github.com/takari/maven-wrapper
-* Periodically review AVM and other Maven dependencies and update if necessary. TODO: document how to do this.
+* Periodically review AVM and other Maven dependencies and update if necessary. TODO: document how to do this. [Issue #27](https://github.com/fulldecent/aion-aip040/issues/27)
 
 ## License
 

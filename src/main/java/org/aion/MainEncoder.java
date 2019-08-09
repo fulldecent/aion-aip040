@@ -11,7 +11,6 @@ import org.aion.avm.userlib.abi.ABIStreamingEncoder;
  * @see https://github.com/aionnetwork/AVM/issues/401
  */
 public class MainEncoder {
-//TODO: what should this function be named?
     public static byte[] deploy(String tokenName, String tokenSymbol, String tokenUriPrefix, String tokenUriPostfix) {
         return new ABIStreamingEncoder()
             .encodeOneString(tokenName)

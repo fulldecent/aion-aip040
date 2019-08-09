@@ -79,7 +79,7 @@ public class AVMBlockchainWrapper {
 
         AionBuffer buffer = AionBuffer.allocate(outputSize);
         //TODO: Add reference to AVM specification that hashCodes will never collide
-        //TODO: is it specified that all hashcodes would fit in a short?
+        // See https://github.com/fulldecent/aion-aip040/issues/28
         buffer.putInt(realm.hashCode());
         for (byte[] keyPathItem : keyPath) {
             buffer.putShort((short) keyPathItem.length); // because [[a], [b]] ± [[a, b]]

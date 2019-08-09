@@ -17,6 +17,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 //TODO: need to get 100% coverage and confirm that we have 100% in the travis test
+// See: https://github.com/fulldecent/aion-aip040/issues/7
 
 public class NFTokenTest {
 
