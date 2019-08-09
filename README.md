@@ -38,6 +38,21 @@ at the bottom of your build.
 
 After you have made any changes, run the build and test command above.
 
+## Overview
+
+* `AVMBlockchainWrapper` is a wrapper around the current AVM storage API.
+* `AIP040Encoder` is an encoder for any contract to interrogate any AIP-040 contract, use this to make type safe function calls which it converts to ABI encoded, wire-ready bytecode.
+* `AIP040Events` is an output encoder for any AIP-040 contract to emit events, use this to pass type safe calls which it directly logs to the blockchain.
+* `NFToken{,Storage}` are a base class and storage details for implementing the standardized AIP-040 behavior.
+* `NFTokenMock{,Encoder}` are a useful implementation and encoder which has additional functionality which we believe many people will want, but which is not standardized.
+* `Main{,Encoder}` are a deployable contract and encoder to access it.
+
+Notes:
+
+* We expect the AVM storage API will change in the future, and the wrapper will be promoted upstream, obviating the need to incude it in this project. https://github.com/aionnetwork/AVM/issues/399.
+
+* The encoders are boilerplate code which should be generated from a Java `interface`. Java does not support class (not instance) methods with dynamic dispatch, so we cannot make an `interface` for Aion contracts. This is a shortcoming of Java and should be addressed as a [Java Specific Request](https://jcp.org/en/jsr/overview). Please help.
+
 ## Extending
 
 If you will extend the functionality of the token implementation, for example to add pausing, extend the provided implementation.
