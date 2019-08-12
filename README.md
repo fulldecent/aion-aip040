@@ -51,13 +51,13 @@ After you have made any changes, run the build and test command above.
 
 Notes:
 
-* We expect the AVM storage API will change in the future, and the wrapper will be promoted upstream, obviating the need to incude it in this project. https://github.com/aionnetwork/AVM/issues/399.
+* We expect the AVM storage API will change in the future, and the wrapper will be promoted upstream, obviating the need to include it in this project. https://github.com/aionnetwork/AVM/issues/399.
 
 * The encoders are boilerplate code which should be generated from a Java `interface`. Java does not support class (not instance) methods with dynamic dispatch, so we cannot make an `interface` for Aion contracts. This is a shortcoming of Java and should be addressed as a [Java Specific Request](https://jcp.org/en/jsr/overview). Please help.
 
 ## Extending
 
-If you will extend the functionality of the token implementation, for example to add pausing, extend the provided implementation.
+If you extend the functionality of the token implementation, for example to add pausing, extend the provided implementation.
 
 To incorporate non-fungible tokens into your contract, which may have other features, copy the AIP-040 boilerplate code from the provided `Main.java`.
 
