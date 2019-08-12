@@ -10,6 +10,9 @@ public class AIP040Events {
      * 
      * @apiSpec          When a token is transferred, the consignee is also
      *                   implicitly unset (i.e. set to null).
+     * @apiSpec          This event must be emitted for each token transferred,
+     *                   minted or burned, even if the transferring was a result
+     *                   of other than <code>aip040TakeOwnership</code>.
      * @param priorOwner the account that was the owner of the token before
      *                   transfer (or null if token is being created)
      * @param newOwner   the account that is the owner of the token after the
