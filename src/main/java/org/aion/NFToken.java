@@ -165,19 +165,19 @@ public class NFToken {
      *                       actual owner of the specified tokens. This prevents
      *                       a race condition due to non-linear settlement of
      *                       transactions on blockchain.
-     * @apiSpec              The permissibility of transfers is not standardized
-     *                       and could depend on the outcome of the last
-     *                       Phillies vs. Blue Jays game. Only the intentions of
-     *                       actors interacting with the contract are
-     *                       communicated in a standardized vocabulary.
+     * @apiSpec              The implementation must revert if the caller is not
+     *                       the current owner, is not authorized by the current
+     *                       owner and is not the current consignee of the
+     *                       token.
+     * @apiSpec              The implementation may revert in other
+     *                       circumstances and could depend on whether the
+     *                       contract is paused or the outcome of the last
+     *                       Phillies vs. Blue Jays game.
      * @apiSpec              This method revokes any consignee for each
      *                       specified token.
-     * @apiSpec              Either all transfers are successful or the
-     *                       transactions reverts. Partial settlement is not
-     *                       allowed.
-     * @apiNote              The transfer should be permitted if the caller is
-     *                       the current owner, the consignee or is authorized
-     *                       by the owner.
+     * @apiSpec              Either all transfers and specifications are
+     *                       followed or the transactions reverts. Partial
+     *                       settlement is not allowed.
      * @param   currentOwner the current owner of all the specified tokens
      * @param   tokenIds     specific tokens to transfer
      */
