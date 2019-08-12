@@ -29,7 +29,7 @@ public class NFTokenStorage {
         TOKEN_OWNERS_MAP, // (BigInteger) => Address
         TOKEN_LOCATION_MAP, // (BigInteger) => BigInteger
         TOKEN_CONSIGNEE_MAP, // (BigInteger) => Address
-        ACCOUNT_AUTHORIZATION_MAP, // (Address, Address) => Boolean
+        ACCOUNT_AUTHORIZATION_MAP, // (Address, Address) => boolean
         OWNER_BALANCE_MAP, // (Address) => BigInteger
         TOKENS_OF_OWNER_ARRAY, // (Address, BigInteger) => BigInteger        
     }
@@ -106,11 +106,11 @@ public class NFTokenStorage {
         AVMBlockchainWrapper.putStorage​(consignee.toByteArray(), StorageSlots.TOKEN_CONSIGNEE_MAP, tokenId.toByteArray());
     }
 
-    protected static Boolean getAccountAuthorization(Address owner, Address authorizee) {
+    protected static boolean getAccountAuthorization(Address owner, Address authorizee) {
         return byteArrayToBoolean(AVMBlockchainWrapper.getStorage​(StorageSlots.ACCOUNT_AUTHORIZATION_MAP, owner.toByteArray(), authorizee.toByteArray()));
     }
 
-    protected static void putAccountAuthorization(Address owner, Address authorizee, Boolean authorized) {
+    protected static void putAccountAuthorization(Address owner, Address authorizee, boolean authorized) {
         AVMBlockchainWrapper.putStorage​(booleanToByteArray(authorized), StorageSlots.ACCOUNT_AUTHORIZATION_MAP, owner.toByteArray(), authorizee.toByteArray());
     }
 
@@ -133,11 +133,11 @@ public class NFTokenStorage {
     private static final byte[] byteArrayTrue = {0x1};
     private static final byte[] byteArrayFalse = {0x0};
 
-    private static Boolean byteArrayToBoolean(byte[] inputByteArray) {
+    private static boolean byteArrayToBoolean(byte[] inputByteArray) {
         return Arrays.equals(inputByteArray, byteArrayTrue);
     }
 
-    private static byte[] booleanToByteArray(Boolean inputBool) {
+    private static byte[] booleanToByteArray(boolean inputBool) {
         return inputBool ? byteArrayTrue : byteArrayFalse;
     }
 }

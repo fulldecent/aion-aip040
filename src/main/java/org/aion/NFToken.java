@@ -112,7 +112,7 @@ public class NFToken {
      * @param  authorizee the authorizee account to interrogate
      * @return            true if authorization is active, false otherwise
      */
-    public static Boolean aip040OwnerDoesAuthorize(Address owner, Address authorizee) {
+    public static boolean aip040OwnerDoesAuthorize(Address owner, Address authorizee) {
         Blockchain.require(owner != null);
         Blockchain.require(authorizee != null);
         return NFTokenStorage.getAccountAuthorization(owner, authorizee);
