@@ -39,7 +39,7 @@ public class AIP040Events {
      *                  unhelpfully duplicative.
      * @param owner     the current owner of the token which is being consigned
      * @param consignee the consignee being assigned to the token (or null if
-     *                  consignement is being revoked)
+     *                  consignment is being revoked)
      * @param tokenId   the identifier for the token which is being consigned (or
      *                  revoking consignment)
      */

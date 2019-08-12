@@ -80,7 +80,7 @@ public class NFToken {
      * 
      * @apiSpec         Every token in a contract must have a unique URI.
      * @param   tokenId a specific token to interrogate
-     * @return          the URI for the specifed token
+     * @return          the URI for the specified token
      * @see             RFC 3986
      */
     public static String aip040TokenUri(BigInteger tokenId) {
@@ -147,7 +147,7 @@ public class NFToken {
      * @param   index the specified ordinal of token, 0 <= index <
      *                <code>aip040TotalSupply()</code>
      * @return        the token identifier for the n-th token in a list of all
-     *                tokens of the speciifed owner
+     *                tokens of the specified owner
      */
     public static BigInteger aip040TokenForOwnerAtIndex(Address owner, BigInteger index) {
         Blockchain.require(owner != null);

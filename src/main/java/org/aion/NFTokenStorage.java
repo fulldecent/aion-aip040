@@ -15,8 +15,8 @@ import java.util.Arrays;
 public class NFTokenStorage {
     /**
      * Best practice with Aion is to use key-value storage for everything except
-     * recursive call state and configuration options which apply to all onchain
-     * transactions.
+     * recursive call state and configuration options which apply to all on-
+     * chain transactions.
      */
     protected enum StorageSlots {
         TOKEN_NAME, // () => String
