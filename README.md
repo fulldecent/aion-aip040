@@ -53,7 +53,7 @@ Notes:
 
 * We expect the AVM storage API will change in the future, and the wrapper will be promoted upstream, obviating the need to include it in this project. https://github.com/aionnetwork/AVM/issues/399.
 
-* The encoders are boilerplate code which should be generated from a Java `interface`. Java does not support class (not instance) methods with dynamic dispatch, so we cannot make an `interface` for Aion contracts. This is a shortcoming of Java and should be addressed as a [Java Specific Request](https://jcp.org/en/jsr/overview). Please help.
+* The encoders are boilerplate code which should be generated from a Java `interface`. Java does not support class (not instance) methods with dynamic dispatch, so we cannot make an `interface` for Aion contracts. This is a shortcoming of Java and should be addressed as a [Java Specification Request](https://jcp.org/en/jsr/overview). Please help.
 
 ## Extending
 
