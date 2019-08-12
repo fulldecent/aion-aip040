@@ -51,8 +51,8 @@ public class NFToken {
     /**
      * Returns the owner (if any) of a specific token.
      * 
-     * @apiSpec The owner must not be null if the token exists (i.e. it
-     *          contributes to <code>aip040TotalSupply</code>).
+     * @apiSpec All tokens that exist (i.e. they contribute to
+     *          <code>aip040TotalSupply</code>) must have a non-null owner.
      * @param   tokenId the token we are interrogating
      * @return          the owner of the specified token, or null if token does
      *                  not exist
@@ -88,6 +88,7 @@ public class NFToken {
         String uriPostfix = NFTokenStorage.getTokenUriPostfix();
         Blockchain.require(uriPrefix != null);
         Blockchain.require(uriPostfix != null);
+        Blockchain.require(NFTokenStorage.getTokenOwner(tokenId) != null);
         return uriPrefix + tokenId.toString() + uriPostfix;
     }
     
