@@ -57,7 +57,11 @@ public class AVMBlockchainWrapper {
     // Using approach from org.aion.avm.userlib/src/org/aion/avm/userlib/abi/ABIStreamingEncoder.java
     private static void checkLengthIsAShort(int size) {
         if (size > Short.MAX_VALUE) {
-            throw new ABIException("Array length must fit in 2 bytes");
+            throw new ABIException(/* "Array length must fit in 2 bytes" */);
+            // Including debugging strings inside a contract is not best
+            // practice because they cost energy, are not optimized away and
+            // the debugging information is never available to the end user.
+            // TODO: Add reference for this
         }
     }
 
