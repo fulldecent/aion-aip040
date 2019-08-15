@@ -11,13 +11,13 @@ import org.aion.avm.userlib.abi.ABIStreamingEncoder;
 * 
 * @see https://github.com/aionnetwork/AVM/issues/401
 */
-public class NFTokenMockEncoder {
+public class NFTokenMockEncoder extends AIP040Encoder {
+
     public static byte[] mint(Address newOwner, BigInteger tokenId) {
         return new ABIStreamingEncoder()
         .encodeOneString("mint")
         .encodeOneAddress(newOwner)
-//TODO: upgrade to get big integers        
-//        .encodeOneBigInteger(tokenId)
+        .encodeOneBigInteger(tokenId)
         .toBytes();
     }
 }

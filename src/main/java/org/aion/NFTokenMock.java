@@ -9,49 +9,58 @@ import java.math.BigInteger;
  * some, if not all, AIP #040 implementations. This functionality is not
  * standardized so it is not included in the <code>NFToken</code> class.
  */
-public class NFTokenMock {
+public class NFTokenMock extends NFToken {
 
     /**
-     * This could be called once during contract deployment
-     * @param tokenName This will be returned from aip040Name
-     * @param tokenSymbol This will be returned from aip040Symbol
-     * @param tokenUriBase This will be used in aip040TokenUri
+     * This could be called once during contract deployment.
+     * 
+     * @implNote                 It is not expected that this will be exposed as
+     *                           a callable method. So no encoder is provided
+     *                           in <code>NFTokenMockEncoder</code>
+     * @param    tokenName       this will be returned from aip040Name
+     * @param    tokenSymbol     this will be returned from aip040Symbol
+     * @param    tokenUriPrefix  this will be used in aip040TokenUri
+     * @param    tokenUriPostfix this will be used in aip040TokenUri
      */
-    public static void setTokenNameSymbolAndUriBase(String tokenName, String tokenSymbol, String uriBase) {
-        Blockchain.require(tokenName != null);
-        Blockchain.require(tokenSymbol != null);
-        Blockchain.require(uriBase != null);
-        Blockchain.require(tokenName.length() > 0);
-        Blockchain.require(tokenSymbol.length() > 0);
-        Blockchain.require(uriBase.length() > 0);
+     
+      public static void setTokenNameSymbolAndUriAffixes(String tokenName, String tokenSymbol, String uriPrefix, String uriPostfix) {
+//        Blockchain.require(tokenName != null);
+//        Blockchain.require(tokenSymbol != null);
+//        Blockchain.require(uriPrefix != null);
+//        Blockchain.require(uriPostfix != null);
         NFTokenStorage.putTokenName(tokenName);
         NFTokenStorage.putTokenSymbol(tokenSymbol);
-        NFTokenStorage.putTokenUriBase(tokenSymbol);
+        NFTokenStorage.putTokenUriPrefix(uriPrefix);
+        NFTokenStorage.putTokenUriPostfix(uriPostfix);
     }
     
     /**
-     * Create a specified token and assign to an account
+     * Create a specified token and assign to an account.
+     * 
      * @param newOwner The new owner of the token
-     * @param tokenId A specific token to create
+     * @param tokenIds Token identifiers to create
      */
-    public static void mint(Address newOwner, BigInteger tokenId) {
+    public static void mint(Address newOwner, BigInteger[] tokenIds) {
         Blockchain.require(newOwner != null);
-        Blockchain.require(tokenId != null);
-        Blockchain.require(NFToken.aip040OwnerOf(tokenId) == null);
+        Blockchain.require(tokenIds != null);
 
-        BigInteger toBalance = NFToken.aip040BalanceOf(newOwner);
-        toBalance = toBalance.add(BigInteger.ONE);
+        BigInteger toBalance = aip040OwnerBalance(newOwner);
+
+        for (BigInteger tokenId : tokenIds) {
+            Blockchain.require(aip040TokenOwner(tokenId) == null);
+            assert tokenId != null; // Confirmed on previous line
+            BigInteger totalSupply = aip040TotalSupply();
+            NFTokenStorage.putTokenAtIndex(totalSupply, tokenId);
+            totalSupply = totalSupply.add(BigInteger.ONE);
+            NFTokenStorage.putTotalSupply(totalSupply);
+
+            // Add to new owner array, O(1) algorithm
+            NFTokenStorage.putTokensOfOwnerArray(newOwner, toBalance, tokenId);
+            NFTokenStorage.putTokenLocation(tokenId, toBalance);
+            toBalance = toBalance.add(BigInteger.ONE);
+    
+            AIP040Events.AIP040Transferred(null, newOwner, tokenId);
+        }
         NFTokenStorage.putOwnerBalance(newOwner, toBalance);
-
-        BigInteger totalSupply = NFToken.aip040TotalSupply();
-        totalSupply = totalSupply.add(BigInteger.ONE);
-        NFTokenStorage.putTotalSupply(totalSupply);
-
-//TODO: add to total list of all tokens
-//TODO: add to list of tokens by owner
-
-        NFTokenStorage.putTokenOwner(tokenId, newOwner);
-        NFTokenStorage.putTokenConsignee(tokenId, null);
-        AIP040Events.AIP040Transferred(null, newOwner, tokenId);
     }
 }

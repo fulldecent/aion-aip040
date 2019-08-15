@@ -7,7 +7,7 @@ import java.util.Arrays;
 /**
  * The methods in this class are fully described by <code>StorageSlots</code>
  * and the comments there. In the future, tooling may automatically generate
- * this file from that.
+ * this class from that specification.
  * 
  * Every method directly gets and puts to storage, which is initially null. So,
  * methods not documented per https://google.github.io/styleguide/javaguide.html#s7.3.1-javadoc-exception-self-explanatory
@@ -15,19 +15,21 @@ import java.util.Arrays;
 public class NFTokenStorage {
     /**
      * Best practice with Aion is to use key-value storage for everything except
-     * recursive call state and configuration options which apply to all onchain
-     * transactions.
+     * recursive call state and configuration options which apply to all on-
+     * chain transactions.
      */
     protected enum StorageSlots {
         TOKEN_NAME, // () => String
         TOKEN_SYMBOL, // () => String
-        TOKEN_URI_BASE, // () => String
+        TOKEN_URI_PREFIX, // () => String
+        TOKEN_URI_POSTFIX, // () => String
         TOTAL_SUPPLY, // () => BigInteger
 
         TOKENS_ARRAY, // (BigInteger) => BigInteger
         TOKEN_OWNERS_MAP, // (BigInteger) => Address
+        TOKEN_LOCATION_MAP, // (BigInteger) => BigInteger
         TOKEN_CONSIGNEE_MAP, // (BigInteger) => Address
-        ACCOUNT_AUTHORIZATION_MAP, // (Address, Address) => Boolean
+        ACCOUNT_AUTHORIZATION_MAP, // (Address, Address) => boolean
         OWNER_BALANCE_MAP, // (Address) => BigInteger
         TOKENS_OF_OWNER_ARRAY, // (Address, BigInteger) => BigInteger        
     }
@@ -48,12 +50,20 @@ public class NFTokenStorage {
         AVMBlockchainWrapper.putStorage​(symbol.getBytes(), StorageSlots.TOKEN_SYMBOL);
     }
 
-    protected static String getTokenUriBase() {
-        return new String(AVMBlockchainWrapper.getStorage​(StorageSlots.TOKEN_URI_BASE));
+    protected static String getTokenUriPrefix() {
+        return new String(AVMBlockchainWrapper.getStorage​(StorageSlots.TOKEN_URI_PREFIX));
     }
 
-    protected static void putTokenUriBase(String uriBase) {
-        AVMBlockchainWrapper.putStorage​(uriBase.getBytes(), StorageSlots.TOKEN_URI_BASE);
+    protected static void putTokenUriPrefix(String uriPrefix) {
+        AVMBlockchainWrapper.putStorage​(uriPrefix.getBytes(), StorageSlots.TOKEN_URI_PREFIX);
+    }
+
+    protected static String getTokenUriPostfix() {
+        return new String(AVMBlockchainWrapper.getStorage​(StorageSlots.TOKEN_URI_POSTFIX));
+    }
+
+    protected static void putTokenUriPostfix(String uriPostfix) {
+        AVMBlockchainWrapper.putStorage​(uriPostfix.getBytes(), StorageSlots.TOKEN_URI_POSTFIX);
     }
 
     protected static BigInteger getTotalSupply() {
@@ -80,6 +90,14 @@ public class NFTokenStorage {
         AVMBlockchainWrapper.putStorage​(owner.toByteArray(), StorageSlots.TOKEN_OWNERS_MAP, tokenId.toByteArray());
     }
 
+    protected static BigInteger getTokenLocation(BigInteger tokenId) {
+        return new BigInteger(AVMBlockchainWrapper.getStorage​(StorageSlots.TOKEN_LOCATION_MAP, tokenId.toByteArray()));
+    }
+
+    protected static void putTokenLocation(BigInteger tokenId, BigInteger location) {
+        AVMBlockchainWrapper.putStorage​(location.toByteArray(), StorageSlots.TOKEN_LOCATION_MAP, tokenId.toByteArray());
+    }
+
     protected static Address getTokenConsignee(BigInteger tokenId) {
         return new Address(AVMBlockchainWrapper.getStorage​(StorageSlots.TOKEN_CONSIGNEE_MAP, tokenId.toByteArray()));
     }
@@ -88,11 +106,11 @@ public class NFTokenStorage {
         AVMBlockchainWrapper.putStorage​(consignee.toByteArray(), StorageSlots.TOKEN_CONSIGNEE_MAP, tokenId.toByteArray());
     }
 
-    protected static Boolean getAccountAuthorization(Address owner, Address authorizee) {
+    protected static boolean getAccountAuthorization(Address owner, Address authorizee) {
         return byteArrayToBoolean(AVMBlockchainWrapper.getStorage​(StorageSlots.ACCOUNT_AUTHORIZATION_MAP, owner.toByteArray(), authorizee.toByteArray()));
     }
 
-    protected static void putAccountAuthorization(Address owner, Address authorizee, Boolean authorized) {
+    protected static void putAccountAuthorization(Address owner, Address authorizee, boolean authorized) {
         AVMBlockchainWrapper.putStorage​(booleanToByteArray(authorized), StorageSlots.ACCOUNT_AUTHORIZATION_MAP, owner.toByteArray(), authorizee.toByteArray());
     }
 
@@ -115,11 +133,11 @@ public class NFTokenStorage {
     private static final byte[] byteArrayTrue = {0x1};
     private static final byte[] byteArrayFalse = {0x0};
 
-    private static Boolean byteArrayToBoolean(byte[] inputByteArray) {
+    private static boolean byteArrayToBoolean(byte[] inputByteArray) {
         return Arrays.equals(inputByteArray, byteArrayTrue);
     }
 
-    private static byte[] booleanToByteArray(Boolean inputBool) {
+    private static byte[] booleanToByteArray(boolean inputBool) {
         return inputBool ? byteArrayTrue : byteArrayFalse;
     }
 }
