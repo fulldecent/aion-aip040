@@ -1,8 +1,10 @@
 package org.aion;
 
+import java.math.BigInteger;
 import org.aion.avm.userlib.AionBuffer;
 import avm.Blockchain;
 import org.aion.avm.userlib.abi.ABIException;
+import avm.Address;
 
 /**
  * We assert that <code>putStorage(byte[] key, byte[] value)</code> and
@@ -28,11 +30,12 @@ public class AVMBlockchainWrapper {
      * Gets a value from the key-value store of the current account at the key
      * location described by <code>realm</code> and <code>keyPath</code>.
      * 
-     * @param realm   an enum constant which qualifies the key path
-     * @param keyPath an array of non-null byte arrays which, along with the
-     *                <code>realm</code>, fully qualifies the storage location
+     * @param realm    an enum constant which qualifies the key path
+     * @param keyPath  an array of non-null byte arrays which, along with the
+     *                 <code>realm</code>, fully qualifies the storage location
+     * @return         the value from storage
      */
-    public static byte[] getStorage​(Enum realm, byte[]... keyPath) {
+    public static byte[] getStorage​ByteArray(Enum realm, byte[]... keyPath) {
         byte[] serializedRealmAndKey = serializeRealmAndKey(realm, keyPath);
         byte[] storageKey = Blockchain.blake2b(serializedRealmAndKey);
         return Blockchain.getStorage(storageKey);
@@ -48,11 +51,151 @@ public class AVMBlockchainWrapper {
      * @param keyPath an array of non-null byte arrays which, along with the
      *                <code>realm</code>, fully qualifies the storage location
      */
-    public static void putStorage​(byte[] value, Enum realm, byte[]... keyPath) {
+    public static void putStorage​ByteArray(byte[] value, Enum realm, byte[]... keyPath) {
         byte[] serializedRealmAndKey = serializeRealmAndKey(realm, keyPath);
         byte[] storageKey = Blockchain.blake2b(serializedRealmAndKey);
         Blockchain.putStorage(storageKey, value);
     }
+
+    /**
+     * Gets a String from the key-value store of the current account at the key
+     * location described by <code>realm</code> and <code>keyPath</code>.
+     * 
+     * @param realm    an enum constant which qualifies the key path
+     * @param keyPath  an array of non-null byte arrays which, along with the
+     *                 <code>realm</code>, fully qualifies the storage location
+     * @return         the value from storage
+     */
+    public static String getStorage​String(Enum realm, byte[]... keyPath) {
+        byte[] encodedStorage = getStorage​ByteArray(realm, keyPath);
+        if (encodedStorage == null) {
+            return null;
+        }
+        return new String(encodedStorage);
+    }
+
+    /**
+     * Stores <code>value</code> into the key-value store of the current account
+     * at the key location described by <code>realm</code> and
+     * <code>keyPath</code>.
+     * 
+     * @param value   what will be stored
+     * @param realm   an enum constant which qualifies the key path
+     * @param keyPath an array of non-null byte arrays which, along with the
+     *                <code>realm</code>, fully qualifies the storage location
+     */
+    public static void putStorage​String(String value, Enum realm, byte[]... keyPath) {
+        putStorage​ByteArray(
+            value == null ? null : value.getBytes(),
+            realm,
+            keyPath
+        );
+    }
+
+    /**
+     * Gets an Address from the key-value store of the current account at the
+     * key location described by <code>realm</code> and <code>keyPath</code>.
+     * 
+     * @param realm    an enum constant which qualifies the key path
+     * @param keyPath  an array of non-null byte arrays which, along with the
+     *                 <code>realm</code>, fully qualifies the storage location
+     * @return         the value from storage
+     */
+    public static Address getStorage​Address(Enum realm, byte[]... keyPath) {
+        byte[] encodedStorage = getStorage​ByteArray(realm, keyPath);
+        if (encodedStorage == null) {
+            return null;
+        }
+        return new Address(encodedStorage);
+    }
+
+    /**
+     * Stores <code>value</code> into the key-value store of the current account
+     * at the key location described by <code>realm</code> and
+     * <code>keyPath</code>.
+     * 
+     * @param value   what will be stored
+     * @param realm   an enum constant which qualifies the key path
+     * @param keyPath an array of non-null byte arrays which, along with the
+     *                <code>realm</code>, fully qualifies the storage location
+     */
+    public static void putStorage​Address(Address value, Enum realm, byte[]... keyPath) {
+        putStorage​ByteArray(
+            value == null ? null : value.toByteArray(),
+            realm,
+            keyPath
+        );
+    }
+
+    /**
+     * Gets a BigInteger from the key-value store of the current account at the
+     * key location described by <code>realm</code> and <code>keyPath</code>.
+     * 
+     * @param  realm   an enum constant which qualifies the key path
+     * @param  keyPath an array of non-null byte arrays which, along with the
+     *                 <code>realm</code>, fully qualifies the storage location
+     * @return         the value from storage
+     */
+    public static BigInteger getStorage​BigInteger(Enum realm, byte[]... keyPath) {
+        byte[] encodedStorage = getStorage​ByteArray(realm, keyPath);
+        if (encodedStorage == null) {
+            return null;
+        }
+        return new BigInteger(encodedStorage);
+    }
+
+    /**
+     * Stores <code>value</code> into the key-value store of the current account
+     * at the key location described by <code>realm</code> and
+     * <code>keyPath</code>.
+     * 
+     * @param value   what will be stored
+     * @param realm   an enum constant which qualifies the key path
+     * @param keyPath an array of non-null byte arrays which, along with the
+     *                <code>realm</code>, fully qualifies the storage location
+     */
+    public static void putStorage​BigInteger(BigInteger value, Enum realm, byte[]... keyPath) {
+        putStorage​ByteArray(
+            value == null ? null : value.toByteArray(),
+            realm,
+            keyPath
+        );
+    }
+
+    /**
+     * Gets a boolean from the key-value store of the current account at the key
+     * location described by <code>realm</code> and <code>keyPath</code>.
+     * 
+     * @implSpec       Only a value generated by <code>putStorageBoolean</code>
+     *                 is properly decoded.
+     * @param  realm   an enum constant which qualifies the key path
+     * @param  keyPath an array of non-null byte arrays which, along with the
+     *                 <code>realm</code>, fully qualifies the storage location
+     * @return         the value from storage
+     */
+    public static boolean getStorage​Boolean(Enum realm, byte[]... keyPath) {
+        byte[] encodedStorage = getStorage​ByteArray(realm, keyPath);
+        return encodedStorage != null && encodedStorage[0] == 0x1;
+    }
+
+    /**
+     * Stores <code>value</code> into the key-value store of the current account
+     * at the key location described by <code>realm</code> and
+     * <code>keyPath</code>.
+     * 
+     * @param value   what will be stored
+     * @param realm   an enum constant which qualifies the key path
+     * @param keyPath an array of non-null byte arrays which, along with the
+     *                <code>realm</code>, fully qualifies the storage location
+     */
+    public static void putStorage​Boolean(boolean value, Enum realm, byte[]... keyPath) {
+        putStorage​ByteArray(
+            value ? new byte[]{0x1} : null,
+            realm,
+            keyPath
+        );
+    }    
+
 
     // Using approach from org.aion.avm.userlib/src/org/aion/avm/userlib/abi/ABIStreamingEncoder.java
     private static void checkLengthIsAShort(int size) {
@@ -91,4 +234,5 @@ public class AVMBlockchainWrapper {
         }
         return buffer.getArray();
     }
+
 }
