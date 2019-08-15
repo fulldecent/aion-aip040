@@ -29,8 +29,8 @@ public class AVMBlockchainWrapper {
      * location described by <code>realm</code> and <code>keyPath</code>.
      * 
      * @param realm   an enum constant which qualifies the key path
-     * @param keyPath an array which, along with the <code>realm</code>, fully
-     *                qualifies the storage location
+     * @param keyPath an array of non-null byte arrays which, along with the
+     *                <code>realm</code>, fully qualifies the storage location
      */
     public static byte[] getStorage​(Enum realm, byte[]... keyPath) {
         byte[] serializedRealmAndKey = serializeRealmAndKey(realm, keyPath);
@@ -45,8 +45,8 @@ public class AVMBlockchainWrapper {
      * 
      * @param value   what will be stored
      * @param realm   an enum constant which qualifies the key path
-     * @param keyPath an array which, along with the <code>realm</code>, fully
-     *                qualifies the storage location
+     * @param keyPath an array of non-null byte arrays which, along with the
+     *                <code>realm</code>, fully qualifies the storage location
      */
     public static void putStorage​(byte[] value, Enum realm, byte[]... keyPath) {
         byte[] serializedRealmAndKey = serializeRealmAndKey(realm, keyPath);
@@ -70,7 +70,7 @@ public class AVMBlockchainWrapper {
      * array.
      * 
      * @param  realm   an enum constant which qualifies the key path
-     * @param  keyPath an array of byte arrays
+     * @param  keyPath an array of non-null byte arrays
      * @return         a byte array which uniquely represents the
      *                 (<code>realm</code>, <code>keyPath</code>) pair 
      */
