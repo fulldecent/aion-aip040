@@ -19,6 +19,8 @@ public class Main {
 
     /**
      * This initialization is run at deploy time.
+     * TODO: The interface to Blockchain ABI could be safer
+     * @see https://github.com/aionnetwork/AVM/issues/410
      */
     static {
         ABIDecoder decoder = new ABIDecoder(Blockchain.getData());
