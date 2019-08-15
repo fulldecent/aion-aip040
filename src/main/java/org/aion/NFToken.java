@@ -197,6 +197,11 @@ public class NFToken {
             NFTokenStorage.putTokenConsignee(tokenId, null);
             NFTokenStorage.putTokenOwner(tokenId, Blockchain.getCaller());
 
+            // General O(1) algorithm to remove an item from an ordered array:
+            //   1. Know where the value because it is indexed
+            //   2. Copy the last item over the value to be removed
+            //   3. Shrink the array
+
             // Remove from old owner array, O(1) algorithm
             BigInteger tokenToRemoveLocation = NFTokenStorage.getTokenLocation(tokenId);
             BigInteger lastTokenLocation = fromBalance.subtract(BigInteger.ONE);
