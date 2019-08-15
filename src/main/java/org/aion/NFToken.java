@@ -84,12 +84,12 @@ public class NFToken {
      * @see             RFC 3986
      */
     public static String aip040TokenUri(BigInteger tokenId) {
+        Blockchain.require(NFTokenStorage.getTokenOwner(tokenId) != null);
         String uriPrefix = NFTokenStorage.getTokenUriPrefix();
         String uriPostfix = NFTokenStorage.getTokenUriPostfix();
-        Blockchain.require(uriPrefix != null);
-        Blockchain.require(uriPostfix != null);
-        Blockchain.require(NFTokenStorage.getTokenOwner(tokenId) != null);
-        return uriPrefix + tokenId.toString() + uriPostfix;
+        return (uriPrefix == null ? "" : uriPrefix) +
+            tokenId.toString() +
+            (uriPostfix == null ? "" : uriPostfix);
     }
     
     /**
@@ -216,11 +216,15 @@ public class NFToken {
             NFTokenStorage.putTokensOfOwnerArray(Blockchain.getCaller(), toBalance, tokenId);
             NFTokenStorage.putTokenLocation(tokenId, toBalance);
             NFTokenStorage.putTokenOwner(tokenId, Blockchain.getCaller());
-            toBalance = toBalance.add(BigInteger.ONE);
+            if (toBalance == null) {
+                toBalance = BigInteger.ONE;
+            } else {
+                toBalance = toBalance.add(BigInteger.ONE);
+            }
     
             AIP040Events.AIP040Transferred(currentOwner, Blockchain.getCaller(), tokenId);
         }
-        NFTokenStorage.putOwnerBalance(currentOwner, fromBalance);
+        NFTokenStorage.putOwnerBalance(currentOwner, fromBalance.signum() == 0 ? null : fromBalance);
         NFTokenStorage.putOwnerBalance(Blockchain.getCaller(), toBalance);
     }
 
@@ -266,11 +270,15 @@ public class NFToken {
             NFTokenStorage.putTokensOfOwnerArray(Blockchain.getCaller(), toBalance, tokenId);
             NFTokenStorage.putTokenLocation(tokenId, toBalance);
             NFTokenStorage.putTokenOwner(tokenId, Blockchain.getCaller());
-            toBalance = toBalance.add(BigInteger.ONE);
+            if (toBalance == null) {
+                toBalance = BigInteger.ONE;
+            } else {
+                toBalance = toBalance.add(BigInteger.ONE);
+            }
     
             AIP040Events.AIP040Transferred(currentOwner, Blockchain.getCaller(), tokenId);
         //}
-        NFTokenStorage.putOwnerBalance(currentOwner, fromBalance);
+        NFTokenStorage.putOwnerBalance(currentOwner, fromBalance.signum() == 0 ? null : fromBalance);
         NFTokenStorage.putOwnerBalance(Blockchain.getCaller(), toBalance);
     }
 

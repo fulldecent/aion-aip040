@@ -51,13 +51,22 @@ public class NFTokenMock extends NFToken {
             assert tokenId != null; // Confirmed on previous line
             BigInteger totalSupply = aip040TotalSupply();
             NFTokenStorage.putTokenAtIndex(totalSupply, tokenId);
-            totalSupply = totalSupply.add(BigInteger.ONE);
+            if (totalSupply == null) {
+                totalSupply = BigInteger.ONE;
+            } else {
+                totalSupply = totalSupply.add(BigInteger.ONE);
+            }
+            
             NFTokenStorage.putTotalSupply(totalSupply);
 
             // Add to new owner array, O(1) algorithm
             NFTokenStorage.putTokensOfOwnerArray(newOwner, toBalance, tokenId);
             NFTokenStorage.putTokenLocation(tokenId, toBalance);
-            toBalance = toBalance.add(BigInteger.ONE);
+            if (toBalance == null) {
+                toBalance = BigInteger.ONE;
+            } else {
+                toBalance = toBalance.add(BigInteger.ONE);
+            }
     
             AIP040Events.AIP040Transferred(null, newOwner, tokenId);
         }
