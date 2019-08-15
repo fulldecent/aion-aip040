@@ -6,7 +6,7 @@ import java.math.BigInteger;
 
 /**
  * This mock class includes additional functionality which will be useful for
- * some, if not all, AIP #040 implementations. This functionality is not
+ * some, if not all, AIP-040 implementations. This functionality is not
  * standardized so it is not included in the <code>NFToken</code> class.
  */
 public class NFTokenMock extends NFToken {
