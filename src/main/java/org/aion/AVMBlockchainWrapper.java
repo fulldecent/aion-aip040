@@ -225,8 +225,8 @@ public class AVMBlockchainWrapper {
         }
 
         AionBuffer buffer = AionBuffer.allocate(outputSize);
-        //TODO: Add reference to AVM specification that hashCodes will never collide
-        // See https://github.com/fulldecent/aion-aip040/issues/28
+        // Enum constants have identity hash codes which cannot collide with
+        // each other. https://github.com/aionnetwork/AVM/wiki/Hash-Code
         buffer.putInt(realm.hashCode());
         for (byte[] keyPathItem : keyPath) {
             buffer.putShort((short) keyPathItem.length); // because [[a], [b]] ± [[a, b]]
