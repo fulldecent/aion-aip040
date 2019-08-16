@@ -2,7 +2,7 @@ package org.aion;
 
 import avm.Address;
 import org.aion.avm.core.util.LogSizeUtils;
-//import org.aion.avm.tooling.AvmRule;
+import org.aion.avm.embed.AvmRule;
 
 import org.aion.avm.userlib.AionBuffer;
 //import org.aion.vm.api.interfaces.IExecutionLog;
@@ -21,7 +21,7 @@ import static org.junit.Assert.assertEquals;
 
 public class NFTokenTest {
 
-/*    
+
     @Rule
     public AvmRule avmRule = new AvmRule(true);
 
@@ -31,26 +31,32 @@ public class NFTokenTest {
 
     private String tokenName = "Planets";
     private String tokenSymbol = "PL";
-    private String tokenUriBase = "https://example.com/ownershipOfPlanets/";
+    private String tokenUriPrefix = "pre";
+    private String tokenUriPostfix = "post";
 
     @Before
     public void deployDapp() {
-        byte[] data = MainEncoder.deploy(tokenName, tokenSymbol, tokenUriBase);
-        byte[] contractData = avmRule.getDappBytes(Main.class, data, AIP040Events.class, NFToken.class, NFTokenMock.class, NFTokenStorage.class, BigInteger.class);
+
+        byte[] data = MainEncoder.deploy(tokenName, tokenSymbol, tokenUriPrefix, tokenUriPostfix);
+        byte[] contractData = avmRule.getDappBytes(Main.class, data, 1, AIP040Events.class, NFToken.class, NFTokenMock.class, NFTokenStorage.class, AVMBlockchainWrapper.class);
         contractAddress = avmRule.deploy(deployer, BigInteger.ZERO, contractData).getDappAddress();
+
     }
 
     @Test
     public void testInitialization() {
 
         System.out.print("Hello World !");
+/*        
         AVMBlockchainWrapper wrapper = new AVMBlockchainWrapper();
 
         byte[] callData = AIP040Encoder.aip040Name();
         AvmRule.ResultWrapper result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, callData);
         String resStr = (String) result.getDecodedReturnData();
         Assert.assertTrue(resStr.equals(tokenName));
+*/
 
+/*        
         callData = AIP040Encoder.aip040Symbol();
         result = avmRule.call(deployer,contractAddress, BigInteger.ZERO, callData);
         resStr = (String) result.getDecodedReturnData();
@@ -65,8 +71,7 @@ public class NFTokenTest {
         result = avmRule.call(deployer,contractAddress, BigInteger.ZERO, callData);
         resBytes = (byte[]) result.getDecodedReturnData();
         Assert.assertTrue(new BigInteger(resBytes).equals(BigInteger.ZERO));
+*/
     }
-
-*/    
 
 }
