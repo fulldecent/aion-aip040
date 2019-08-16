@@ -36,21 +36,21 @@ public class AIP040Encoder {
     public static byte[] aip040TokenOwner(BigInteger tokenId) {
         return new ABIStreamingEncoder()
         .encodeOneString("aip040TokenOwner")
-        .encodeOneByteArray(tokenId.toByteArray())
+        .encodeOneBigInteger(tokenId)
         .toBytes();
     }
 
     public static byte[] aip040TokenConsignee(BigInteger tokenId) {
         return new ABIStreamingEncoder()
         .encodeOneString("aip040TokenConsignee")
-        .encodeOneByteArray(tokenId.toByteArray())
+        .encodeOneBigInteger(tokenId)
         .toBytes();
     }
 
     public static byte[] aip040TokenUri(BigInteger tokenId) {
         return new ABIStreamingEncoder()
         .encodeOneString("aip040TokenUri")
-        .encodeOneByteArray(tokenId.toByteArray())
+        .encodeOneBigInteger(tokenId)
         .toBytes();
     }
 
