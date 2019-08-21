@@ -87,9 +87,13 @@ public class NFToken {
         Blockchain.require(NFTokenStorage.getTokenOwner(tokenId) != null);
         String uriPrefix = NFTokenStorage.getTokenUriPrefix();
         String uriPostfix = NFTokenStorage.getTokenUriPostfix();
-        return (uriPrefix == null ? "" : uriPrefix) +
-            tokenId.toString() +
-            (uriPostfix == null ? "" : uriPostfix);
+        if (uriPostfix == null){
+            uriPostfix = "";
+        }
+        if (uriPrefix == null){
+            uriPrefix = "";
+        }
+        return uriPrefix + tokenId.toString() + uriPostfix;
     }
     
     /**
