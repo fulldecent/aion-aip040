@@ -197,7 +197,7 @@ public class NFToken {
 
         for (BigInteger tokenId : tokenIds) {
             Blockchain.require(aip040TokenOwner(tokenId).equals(currentOwner));
-            assert tokenId != null; // Confirmed on previous line
+            // assert tokenId != null; // aip040TokenOwner throws if tokenId is null
             Blockchain.require(isAuthorized || aip040TokenConsignee(tokenId).equals(caller));
             NFTokenStorage.putTokenConsignee(tokenId, null);
             NFTokenStorage.putTokenOwner(tokenId, caller);
@@ -252,7 +252,7 @@ public class NFToken {
 
         //for (BigInteger tokenId : tokenIds) {
             Blockchain.require(aip040TokenOwner(tokenId).equals(currentOwner));
-            assert tokenId != null; // Confirmed on previous line
+            // assert tokenId != null; // aip040TokenOwner throws if tokenId is null
             Blockchain.require(isAuthorized || aip040TokenConsignee(tokenId).equals(caller));
             NFTokenStorage.putTokenConsignee(tokenId, null);
             NFTokenStorage.putTokenOwner(tokenId, caller);
@@ -313,7 +313,7 @@ public class NFToken {
 
         for (BigInteger tokenId : tokenIds) {
             Blockchain.require(aip040TokenOwner(tokenId).equals(owner));
-            assert tokenId != null; // Confirmed on previous line
+            // assert tokenId != null; // aip040TokenOwner throws if tokenId is null
             NFTokenStorage.putTokenConsignee(tokenId, consignee);
             AIP040Events.AIP040Consigned(owner, consignee, tokenId);    
         }
@@ -338,7 +338,7 @@ public class NFToken {
 
         //for (BigInteger tokenId : tokenIds) {
             Blockchain.require(aip040TokenOwner(tokenId).equals(owner));
-            assert tokenId != null; // Confirmed on previous line
+            // assert tokenId != null; // aip040TokenOwner throws if tokenId is null
             NFTokenStorage.putTokenConsignee(tokenId, consignee);
             AIP040Events.AIP040Consigned(owner, consignee, tokenId);    
         //}
