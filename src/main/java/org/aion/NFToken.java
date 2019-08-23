@@ -85,7 +85,7 @@ public class NFToken {
      */
     public static String aip040TokenUri(BigInteger tokenId) {
         Blockchain.require(tokenId != null);
-        if (NFTokenStorage.getTokenOwner(tokenId) != null) {
+        if (NFTokenStorage.getTokenOwner(tokenId) == null) {
             return null;
         }
         String uriPrefix = NFTokenStorage.getTokenUriPrefix();
