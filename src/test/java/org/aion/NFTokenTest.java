@@ -1,13 +1,13 @@
 package org.aion;
 
 import avm.Address;
+import avm.Blockchain;
 import org.aion.avm.core.util.LogSizeUtils;
+import org.aion.avm.embed.AddressUtil;
 import org.aion.avm.embed.AvmRule;
 
-import org.aion.avm.userlib.AionBuffer;
-//import org.aion.vm.api.interfaces.IExecutionLog;
-//import org.aion.vm.api.interfaces.ResultCode;
 //TODO: fx this next line, it is not best practice
+import org.aion.avm.userlib.abi.ABIStreamingEncoder;
 import org.junit.*;
 
 
@@ -34,6 +34,7 @@ public class NFTokenTest {
     private String tokenUriPrefix = "pre";
     private String tokenUriPostfix = "post";
 
+    private BigInteger balance = BigInteger.valueOf(1_000_000_000_000_000_000L).multiply(BigInteger.TEN);
     @Before
     public void deployDapp() {
 
@@ -43,35 +44,870 @@ public class NFTokenTest {
 
     }
 
+    /******************************Basics******************************/
     @Test
-    public void testInitialization() {
-
-        System.out.print("Hello World !");
-/*        
-        AVMBlockchainWrapper wrapper = new AVMBlockchainWrapper();
-
-        byte[] callData = AIP040Encoder.aip040Name();
-        AvmRule.ResultWrapper result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, callData);
-        String resStr = (String) result.getDecodedReturnData();
-        Assert.assertTrue(resStr.equals(tokenName));
-*/
-
-/*        
-        callData = AIP040Encoder.aip040Symbol();
-        result = avmRule.call(deployer,contractAddress, BigInteger.ZERO, callData);
-        resStr = (String) result.getDecodedReturnData();
-        Assert.assertTrue(resStr.equals(tokenSymbol));
-
-        callData = AIP040Encoder.aip040TotalSupply();
-        result = avmRule.call(deployer,contractAddress, BigInteger.ZERO, callData);
-        byte[] resBytes = (byte[]) result.getDecodedReturnData();
-        Assert.assertTrue(new BigInteger(resBytes).equals(BigInteger.ZERO));
-
-        callData = AIP040Encoder.aip040OwnerBalance(deployer);
-        result = avmRule.call(deployer,contractAddress, BigInteger.ZERO, callData);
-        resBytes = (byte[]) result.getDecodedReturnData();
-        Assert.assertTrue(new BigInteger(resBytes).equals(BigInteger.ZERO));
-*/
+    public void testName() {
+        AvmRule.ResultWrapper result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040Name());
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals("Planets"));
     }
+
+    @Test
+    public void testSymbol() {
+        AvmRule.ResultWrapper result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040Symbol());
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals("PL"));
+    }
+    
+    @Test
+    public void testTotalSupplyAfterDeployment() {
+        AvmRule.ResultWrapper result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TotalSupply());
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(BigInteger.ZERO));
+    }
+    
+    @Test
+    public void testTokenOwner() {
+        AvmRule.ResultWrapper result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenOwner(BigInteger.TEN));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData() == null);
+
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenOwner(null));
+        Assert.assertTrue(result.getReceiptStatus().isFailed());
+    }
+    
+    @Test
+    public void testTokenConsignee() {
+        
+        AvmRule.ResultWrapper result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenConsignee(BigInteger.TEN));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData() == null);
+
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenConsignee(null));
+        Assert.assertTrue(result.getReceiptStatus().isFailed());
+ 
+    }
+    
+    @Test
+    public void testConsign(){
+
+        AvmRule.ResultWrapper result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040Consign(null, avmRule.getRandomAddress(BigInteger.TEN), new BigInteger[]{BigInteger.ZERO, BigInteger.ONE}));
+        Assert.assertTrue(result.getReceiptStatus().isFailed());
+
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040Consign(deployer, null, new BigInteger[]{BigInteger.ZERO, BigInteger.ONE}));
+        Assert.assertTrue(result.getReceiptStatus().isFailed());
+
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040Consign(deployer, avmRule.getRandomAddress(BigInteger.TEN), null));
+        Assert.assertTrue(result.getReceiptStatus().isFailed());
+        
+    }
+
+    @Test
+    public void testTokenUri() {
+        AvmRule.ResultWrapper result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenUri(BigInteger.TEN));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData() == null);
+
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenUri(null));
+        Assert.assertTrue(result.getReceiptStatus().isFailed());
+    }
+    
+    @Test
+    public void testOwnerBalance() {
+        AvmRule.ResultWrapper result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040OwnerBalance(avmRule.getRandomAddress(BigInteger.TEN)));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(BigInteger.ZERO));
+
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040OwnerBalance(null));
+        Assert.assertTrue(result.getReceiptStatus().isFailed());
+    }
+    
+    @Test
+    public void testOwnerDoesAuthorize() {
+        AvmRule.ResultWrapper result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040OwnerDoesAuthorize(avmRule.getRandomAddress(BigInteger.TEN), avmRule.getRandomAddress(BigInteger.TEN)));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(false));
+
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040OwnerDoesAuthorize(null, avmRule.getRandomAddress(BigInteger.TEN)));
+        Assert.assertTrue(result.getReceiptStatus().isFailed());
+
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040OwnerDoesAuthorize(avmRule.getRandomAddress(BigInteger.TEN), null));
+        Assert.assertTrue(result.getReceiptStatus().isFailed());
+    }
+
+    @Test
+    public void testTokenAtIndex() {
+        AvmRule.ResultWrapper result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenAtIndex(BigInteger.ZERO));
+        Assert.assertTrue(result.getReceiptStatus().isFailed());
+
+    }
+
+    @Test
+    public void testTokenForOwnerAtIndex() {
+        AvmRule.ResultWrapper result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenForOwnerAtIndex(avmRule.getRandomAddress(BigInteger.TEN), BigInteger.ZERO));
+        Assert.assertTrue(result.getReceiptStatus().isFailed());
+    }
+
+    
+    /****************Operator***************/
+    
+    @Test
+    public void testAuthorizeAndOwnerDoesAuthorizeAndDeauthorize() {
+        //Authorize null
+        AvmRule.ResultWrapper result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040Authorize(null));
+        Assert.assertTrue(result.getReceiptStatus().isFailed());
+        
+        //Authorize
+        Address authorizee = avmRule.getRandomAddress(BigInteger.ZERO);
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040Authorize(authorizee));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        assertEquals(1, result.getTransactionResult().logs.size());
+        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Authorized".getBytes()), result.getTransactionResult().logs.get(0).copyOfTopics().get(0));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(deployer.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(1));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(authorizee.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(2));
+        assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(0).copyOfData());
+        
+        //Authorize an existing authorizee
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040Authorize(authorizee));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        assertEquals(1, result.getTransactionResult().logs.size());
+        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Authorized".getBytes()), result.getTransactionResult().logs.get(0).copyOfTopics().get(0));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(deployer.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(1));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(authorizee.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(2));
+        assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(0).copyOfData());
+        
+        
+        //Does Authorize
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040OwnerDoesAuthorize(deployer, authorizee));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(true));
+        
+        //Deauthorize null
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040Deauthorize(null));
+        Assert.assertTrue(result.getReceiptStatus().isFailed());
+        
+        //Deauthorize
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040Deauthorize(authorizee));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        assertEquals(1, result.getTransactionResult().logs.size());
+        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Deauthorized".getBytes()), result.getTransactionResult().logs.get(0).copyOfTopics().get(0));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(deployer.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(1));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(authorizee.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(2));
+        assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(0).copyOfData());
+
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040OwnerDoesAuthorize(deployer, authorizee));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(false));
+        
+        //Deauthorize non-existing authorizee
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040Deauthorize(authorizee));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        assertEquals(1, result.getTransactionResult().logs.size());
+        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Deauthorized".getBytes()), result.getTransactionResult().logs.get(0).copyOfTopics().get(0));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(deployer.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(1));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(authorizee.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(2));
+        assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(0).copyOfData());
+
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040OwnerDoesAuthorize(deployer, authorizee));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(false));
+
+        //Authorize/deauthorize self
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040Authorize(deployer));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        assertEquals(1, result.getTransactionResult().logs.size());
+        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Authorized".getBytes()), result.getTransactionResult().logs.get(0).copyOfTopics().get(0));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(deployer.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(1));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(deployer.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(2));
+        assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(0).copyOfData());
+
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040Deauthorize(deployer));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        assertEquals(1, result.getTransactionResult().logs.size());
+        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Deauthorized".getBytes()), result.getTransactionResult().logs.get(0).copyOfTopics().get(0));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(deployer.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(1));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(deployer.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(2));
+        assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(0).copyOfData());
+        
+        
+    }
+
+    /****************Mint, consign,take the ownership***************/
+    @Test
+    public void testMintOneTokenToSelfAndTakeOwnerShipAndConsign() {
+        Address tokenIssuer = avmRule.getRandomAddress(balance);
+        Address tokenConsignee = avmRule.getRandomAddress(balance);
+        BigInteger[] tokenID = new BigInteger[]{BigInteger.valueOf(333)};
+        
+        //mint one token to self
+        AvmRule.ResultWrapper result = avmRule.call(tokenIssuer, contractAddress, BigInteger.ZERO, new ABIStreamingEncoder().encodeOneString("mint").encodeOneAddress(tokenIssuer).encodeOneBigIntegerArray(tokenID).toBytes());
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        assertEquals(1, result.getTransactionResult().logs.size());
+        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Transferred".getBytes()), result.getTransactionResult().logs.get(0).copyOfTopics().get(0));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenIssuer.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(1));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenIssuer.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(2));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenID[0].toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(3));
+        assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(0).copyOfData());
+        
+        //total supply
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TotalSupply());
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(BigInteger.ONE));
+        
+        //token owner
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenOwner(tokenID[0]));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenIssuer));
+        
+        //ower balance
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040OwnerBalance(tokenIssuer));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(BigInteger.ONE));
+        
+        //token at index
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenAtIndex(BigInteger.ZERO));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenID[0]));
+        
+        
+        //token for owner at index
+        result =  avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenForOwnerAtIndex(tokenIssuer, BigInteger.ZERO));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenID[0]));
+        
+        //owner is null
+        result =  avmRule.call(tokenIssuer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TakeOwnership(null,tokenID));
+        Assert.assertTrue(result.getReceiptStatus().isFailed());
+        
+        //tokenID is null
+        result =  avmRule.call(tokenIssuer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TakeOwnership(tokenIssuer,null));
+        Assert.assertTrue(result.getReceiptStatus().isFailed());
+        
+        //take from self
+        result =  avmRule.call(tokenIssuer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TakeOwnership(tokenIssuer,tokenID));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        assertEquals(1, result.getTransactionResult().logs.size());
+        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Transferred".getBytes()), result.getTransactionResult().logs.get(0).copyOfTopics().get(0));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenIssuer.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(1));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenIssuer.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(2));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenID[0].toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(3));
+        assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(0).copyOfData());
+        
+        //take from wrong owner
+        result =  avmRule.call(tokenIssuer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TakeOwnership(avmRule.getRandomAddress(balance),tokenID));
+        Assert.assertTrue(result.getReceiptStatus().isFailed());
+
+        //token owner after take from self
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenOwner(tokenID[0]));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenIssuer));
+
+        //ower balance after take from self
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040OwnerBalance(tokenIssuer));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(BigInteger.ONE));
+
+        //token at index  after take from self
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenAtIndex(BigInteger.ZERO));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenID[0]));
+        
+        //token for owner at index  after take from self
+        result =  avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenForOwnerAtIndex(tokenIssuer, BigInteger.ZERO));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenID[0]));
+        
+        //consignee is null
+        result =  avmRule.call(avmRule.getRandomAddress(balance), contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TakeOwnership(tokenIssuer,tokenID));
+        Assert.assertTrue(result.getReceiptStatus().isFailed());
+        
+        //consign to other by other
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040Consign(tokenIssuer,tokenConsignee,tokenID));
+        Assert.assertTrue(result.getReceiptStatus().isFailed());
+
+        //consign to other by other with wrong owner
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040Consign(deployer,tokenConsignee,tokenID));
+        Assert.assertTrue(result.getReceiptStatus().isFailed());
+        
+        //consign to other by self
+        result = avmRule.call(tokenIssuer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040Consign(tokenIssuer,tokenConsignee,tokenID));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        assertEquals(1, result.getTransactionResult().logs.size());
+        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Consigned".getBytes()), result.getTransactionResult().logs.get(0).copyOfTopics().get(0));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenIssuer.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(1));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenConsignee.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(2));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenID[0].toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(3));
+        assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(0).copyOfData());
+
+        //check consignee
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenConsignee(tokenID[0]));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenConsignee));
+        
+        //other takes token
+        result =  avmRule.call(tokenConsignee, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TakeOwnership(tokenIssuer,tokenID));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        assertEquals(1, result.getTransactionResult().logs.size());
+        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Transferred".getBytes()), result.getTransactionResult().logs.get(0).copyOfTopics().get(0));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenIssuer.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(1));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenConsignee.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(2));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenID[0].toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(3));
+        assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(0).copyOfData());
+
+        //check consignee after taken
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenConsignee(tokenID[0]));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(null));
+        
+        //token owner after taken from other
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenOwner(tokenID[0]));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenConsignee));
+
+        //ower balance after taken from other
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040OwnerBalance(tokenIssuer));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(BigInteger.ZERO));
+
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040OwnerBalance(tokenConsignee));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(BigInteger.ONE));
+
+        //token at index after taken from other
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenAtIndex(BigInteger.ZERO));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenID[0]));
+
+        //token for owner at index  after taken from other
+        result =  avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenForOwnerAtIndex(tokenConsignee, BigInteger.ZERO));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenID[0]));
+
+        result =  avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenForOwnerAtIndex(tokenIssuer, BigInteger.ZERO));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData() == null);
+    }
+
+    @Test
+    public void testMintOneTokenToOtherAndTakeOwnerShipAndConsign() {
+        Address tokenIssuer = avmRule.getRandomAddress(balance);
+        Address tokenOwner = avmRule.getRandomAddress(balance);
+        Address tokenConsignee = avmRule.getRandomAddress(balance);
+        BigInteger[] tokenID = new BigInteger[]{BigInteger.valueOf(333)};
+
+        //mint one token to other
+        AvmRule.ResultWrapper result = avmRule.call(tokenIssuer, contractAddress, BigInteger.ZERO, new ABIStreamingEncoder().encodeOneString("mint").encodeOneAddress(tokenOwner).encodeOneBigIntegerArray(tokenID).toBytes());
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        assertEquals(1, result.getTransactionResult().logs.size());
+        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Transferred".getBytes()), result.getTransactionResult().logs.get(0).copyOfTopics().get(0));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenIssuer.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(1));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenOwner.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(2));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenID[0].toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(3));
+        assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(0).copyOfData());
+
+        //total supply
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TotalSupply());
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(BigInteger.ONE));
+
+        //token owner
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenOwner(tokenID[0]));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenOwner));
+
+        //ower balance
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040OwnerBalance(tokenIssuer));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(BigInteger.ZERO));
+
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040OwnerBalance(tokenOwner));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(BigInteger.ONE));
+
+        //token at index
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenAtIndex(BigInteger.ZERO));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenID[0]));
+
+
+        //token for owner at index
+        result =  avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenForOwnerAtIndex(tokenOwner, BigInteger.ZERO));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenID[0]));
+        
+        //consign by token owner
+        result = avmRule.call(tokenOwner, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040Consign(tokenOwner,tokenConsignee,tokenID));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        assertEquals(1, result.getTransactionResult().logs.size());
+        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Consigned".getBytes()), result.getTransactionResult().logs.get(0).copyOfTopics().get(0));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenOwner.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(1));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenConsignee.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(2));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenID[0].toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(3));
+        assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(0).copyOfData());
+        
+        //taken ownership with wrong owner
+        result = avmRule.call(tokenConsignee, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TakeOwnership(deployer, tokenID));
+        Assert.assertTrue(result.getReceiptStatus().isFailed());
+        
+        //taken ownership
+        result = avmRule.call(tokenConsignee, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TakeOwnership(tokenOwner, tokenID));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        assertEquals(1, result.getTransactionResult().logs.size());
+        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Transferred".getBytes()), result.getTransactionResult().logs.get(0).copyOfTopics().get(0));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenOwner.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(1));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenConsignee.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(2));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenID[0].toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(3));
+        assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(0).copyOfData());
+        
+        //check consignee
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenConsignee(tokenID[0]));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(null));
+        
+        //check owner
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenOwner(tokenID[0]));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenConsignee));
+    }
+
+
+    /****************Mint, authorize,take the ownership***************/
+    @Test
+    public void testMintOneTokenToOtherAndTakeOwnerShipAndAuthorize() {
+        Address tokenIssuer = avmRule.getRandomAddress(balance);
+        Address tokenOwner = avmRule.getRandomAddress(balance);
+        Address tokenAuhorizee = avmRule.getRandomAddress(balance);
+        BigInteger[] tokenID = new BigInteger[]{BigInteger.valueOf(333)};
+
+        //mint one token to other
+        AvmRule.ResultWrapper result = avmRule.call(tokenIssuer, contractAddress, BigInteger.ZERO, new ABIStreamingEncoder().encodeOneString("mint").encodeOneAddress(tokenOwner).encodeOneBigIntegerArray(tokenID).toBytes());
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        assertEquals(1, result.getTransactionResult().logs.size());
+        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Transferred".getBytes()), result.getTransactionResult().logs.get(0).copyOfTopics().get(0));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenIssuer.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(1));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenOwner.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(2));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenID[0].toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(3));
+        assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(0).copyOfData());
+        
+        //total supply
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TotalSupply());
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(BigInteger.ONE));
+
+        //token owner
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenOwner(tokenID[0]));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenOwner));
+
+        //ower balance
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040OwnerBalance(tokenOwner));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(BigInteger.ONE));
+
+        //token at index
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenAtIndex(BigInteger.ZERO));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenID[0]));
+
+
+        //token for owner at index
+        result =  avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenForOwnerAtIndex(tokenOwner, BigInteger.ZERO));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenID[0]));
+
+        //authorize
+        result = avmRule.call(tokenOwner, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040Authorize(tokenAuhorizee));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        
+        //take with wrong owner
+        result = avmRule.call(tokenAuhorizee, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TakeOwnership(deployer, tokenID));
+        Assert.assertTrue(result.getReceiptStatus().isFailed());
+        
+        //take ownership
+        result = avmRule.call(tokenAuhorizee, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TakeOwnership(tokenOwner, tokenID));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        assertEquals(1, result.getTransactionResult().logs.size());
+        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Transferred".getBytes()), result.getTransactionResult().logs.get(0).copyOfTopics().get(0));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenOwner.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(1));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenAuhorizee.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(2));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenID[0].toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(3));
+        assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(0).copyOfData());
+
+        //token owner after transfer
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenOwner(tokenID[0]));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenAuhorizee));
+
+        //ower balance after transfer
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040OwnerBalance(tokenAuhorizee));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(BigInteger.ONE));
+
+        //token at index after transfer
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenAtIndex(BigInteger.ZERO));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenID[0]));
+
+
+        //token for owner at index after transfer
+        result =  avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenForOwnerAtIndex(tokenAuhorizee, BigInteger.ZERO));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenID[0]));
+
+    }
+
+    /****************Mint, authorize,consign take the ownership***************/
+    @Test
+    public void testMintOneTokenToOtherAndTakeOwnerShipAndAuthorizeAndConsign() {
+        
+        Address tokenIssuer = avmRule.getRandomAddress(balance);
+        Address tokenOwner = avmRule.getRandomAddress(balance);
+        Address tokenAuhorizee = avmRule.getRandomAddress(balance);
+        Address tokenConsignee = avmRule.getRandomAddress(balance);
+        BigInteger[] tokenID = new BigInteger[]{BigInteger.valueOf(333)};
+
+        //mint one token to other
+        AvmRule.ResultWrapper result = avmRule.call(tokenIssuer, contractAddress, BigInteger.ZERO, new ABIStreamingEncoder().encodeOneString("mint").encodeOneAddress(tokenOwner).encodeOneBigIntegerArray(tokenID).toBytes());
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        assertEquals(1, result.getTransactionResult().logs.size());
+        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Transferred".getBytes()), result.getTransactionResult().logs.get(0).copyOfTopics().get(0));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenIssuer.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(1));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenOwner.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(2));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenID[0].toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(3));
+        assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(0).copyOfData());
+
+        //total supply
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TotalSupply());
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(BigInteger.ONE));
+
+        //token owner
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenOwner(tokenID[0]));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenOwner));
+
+        //ower balance
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040OwnerBalance(tokenOwner));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(BigInteger.ONE));
+
+        //token at index
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenAtIndex(BigInteger.ZERO));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenID[0]));
+
+
+        //token for owner at index
+        result =  avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenForOwnerAtIndex(tokenOwner, BigInteger.ZERO));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenID[0]));
+
+        //authorize
+        result = avmRule.call(tokenOwner, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040Authorize(tokenAuhorizee));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+
+        //consign
+        result = avmRule.call(tokenAuhorizee, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040Consign(tokenOwner,tokenConsignee,tokenID));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        assertEquals(1, result.getTransactionResult().logs.size());
+        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Consigned".getBytes()), result.getTransactionResult().logs.get(0).copyOfTopics().get(0));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenAuhorizee.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(1));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenConsignee.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(2));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenID[0].toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(3));
+        assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(0).copyOfData());
+        
+        
+        //take ownership with ownership as authorizee
+        result = avmRule.call(tokenConsignee, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TakeOwnership(tokenAuhorizee, tokenID));
+        Assert.assertTrue(result.getReceiptStatus().isFailed());
+      
+        //take ownership
+        result = avmRule.call(tokenConsignee, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TakeOwnership(tokenOwner, tokenID));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        assertEquals(1, result.getTransactionResult().logs.size());
+        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Transferred".getBytes()), result.getTransactionResult().logs.get(0).copyOfTopics().get(0));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenOwner.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(1));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenConsignee.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(2));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenID[0].toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(3));
+        assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(0).copyOfData());
+
+        //token owner after transfer
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenOwner(tokenID[0]));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenConsignee));
+
+        //ower balance after transfer
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040OwnerBalance(tokenConsignee));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(BigInteger.ONE));
+
+        //token at index after transfer
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenAtIndex(BigInteger.ZERO));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenID[0]));
+
+
+        //token for owner at index after transfer
+        result =  avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenForOwnerAtIndex(tokenConsignee, BigInteger.ZERO));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenID[0]));
+
+    }
+
+    /****************Mint, authorize, deauthorize, take the ownership***************/
+    @Test
+    public void testMintOneTokenToOtherAndTakeOwnerShipAndAuthorizeAndDeauthorize() {
+
+        Address tokenIssuer = avmRule.getRandomAddress(balance);
+        Address tokenOwner = avmRule.getRandomAddress(balance);
+        Address tokenAuhorizee = avmRule.getRandomAddress(balance);
+        BigInteger[] tokenID = new BigInteger[]{BigInteger.valueOf(333)};
+
+        //mint one token to other
+        AvmRule.ResultWrapper result = avmRule.call(tokenIssuer, contractAddress, BigInteger.ZERO, new ABIStreamingEncoder().encodeOneString("mint").encodeOneAddress(tokenOwner).encodeOneBigIntegerArray(tokenID).toBytes());
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        assertEquals(1, result.getTransactionResult().logs.size());
+        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Transferred".getBytes()), result.getTransactionResult().logs.get(0).copyOfTopics().get(0));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenIssuer.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(1));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenOwner.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(2));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenID[0].toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(3));
+        assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(0).copyOfData());
+
+        //authorize
+        result = avmRule.call(tokenOwner, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040Authorize(tokenAuhorizee));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        
+        //deauthorize
+        result = avmRule.call(tokenOwner, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040Deauthorize(tokenAuhorizee));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        
+
+        //take ownership 
+        result = avmRule.call(tokenAuhorizee, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TakeOwnership(tokenOwner, tokenID));
+        Assert.assertTrue(result.getReceiptStatus().isFailed());
+    }
+
+    /****************Mint 5 tokens***************/
+    @Test
+    public void testMintFiveTokens() {
+
+        Address tokenIssuer = avmRule.getRandomAddress(balance);
+        Address tokenOwner = avmRule.getRandomAddress(balance);
+        Address tokenConsignee = avmRule.getRandomAddress(balance);
+        BigInteger[] tokenIDs = new BigInteger[]{BigInteger.valueOf(333), BigInteger.valueOf(666), BigInteger.valueOf(999), BigInteger.valueOf(3333), BigInteger.valueOf(6666)};
+
+        //mint five tokens to other
+        AvmRule.ResultWrapper result = avmRule.call(tokenIssuer, contractAddress, BigInteger.ZERO, new ABIStreamingEncoder().encodeOneString("mint").encodeOneAddress(tokenOwner).encodeOneBigIntegerArray(tokenIDs).toBytes());
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        assertEquals(5, result.getTransactionResult().logs.size());
+        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Transferred".getBytes()), result.getTransactionResult().logs.get(0).copyOfTopics().get(0));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenIssuer.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(1));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenOwner.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(2));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenIDs[0].toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(3));
+        assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(0).copyOfData());
+
+        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Transferred".getBytes()), result.getTransactionResult().logs.get(1).copyOfTopics().get(0));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenIssuer.toByteArray()), result.getTransactionResult().logs.get(1).copyOfTopics().get(1));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenOwner.toByteArray()), result.getTransactionResult().logs.get(1).copyOfTopics().get(2));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenIDs[1].toByteArray()), result.getTransactionResult().logs.get(1).copyOfTopics().get(3));
+        assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(1).copyOfData());
+
+        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Transferred".getBytes()), result.getTransactionResult().logs.get(2).copyOfTopics().get(0));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenIssuer.toByteArray()), result.getTransactionResult().logs.get(2).copyOfTopics().get(1));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenOwner.toByteArray()), result.getTransactionResult().logs.get(2).copyOfTopics().get(2));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenIDs[2].toByteArray()), result.getTransactionResult().logs.get(2).copyOfTopics().get(3));
+        assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(2).copyOfData());
+
+        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Transferred".getBytes()), result.getTransactionResult().logs.get(3).copyOfTopics().get(0));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenIssuer.toByteArray()), result.getTransactionResult().logs.get(3).copyOfTopics().get(1));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenOwner.toByteArray()), result.getTransactionResult().logs.get(3).copyOfTopics().get(2));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenIDs[3].toByteArray()), result.getTransactionResult().logs.get(3).copyOfTopics().get(3));
+        assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(3).copyOfData());
+
+        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Transferred".getBytes()), result.getTransactionResult().logs.get(4).copyOfTopics().get(0));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenIssuer.toByteArray()), result.getTransactionResult().logs.get(4).copyOfTopics().get(1));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenOwner.toByteArray()), result.getTransactionResult().logs.get(4).copyOfTopics().get(2));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenIDs[4].toByteArray()), result.getTransactionResult().logs.get(4).copyOfTopics().get(3));
+        assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(4).copyOfData());
+
+        //total supply
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TotalSupply());
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(BigInteger.valueOf(5)));
+        
+        //token at index
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenAtIndex(BigInteger.ZERO));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenIDs[0]));
+
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenAtIndex(BigInteger.ONE));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenIDs[1]));
+        
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenAtIndex(BigInteger.TWO));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenIDs[2]));
+        
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenAtIndex(BigInteger.valueOf(3)));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenIDs[3]));
+        
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenAtIndex(BigInteger.valueOf(4)));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenIDs[4]));
+        
+        //token for owner at index
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenForOwnerAtIndex(tokenOwner, BigInteger.ZERO));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenIDs[0]));
+
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenForOwnerAtIndex(tokenOwner, BigInteger.ONE));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenIDs[1]));
+
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenForOwnerAtIndex(tokenOwner, BigInteger.TWO));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenIDs[2]));
+
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenForOwnerAtIndex(tokenOwner, BigInteger.valueOf(3)));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenIDs[3]));
+
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenForOwnerAtIndex(tokenOwner, BigInteger.valueOf(4)));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenIDs[4]));
+        
+        //consign last two tokens
+        result = avmRule.call(tokenOwner, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040Consign(tokenOwner,tokenConsignee, new BigInteger[]{tokenIDs[3], tokenIDs[4]}));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        
+        assertEquals(2, result.getTransactionResult().logs.size());
+        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Consigned".getBytes()), result.getTransactionResult().logs.get(0).copyOfTopics().get(0));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenOwner.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(1));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenConsignee.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(2));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenIDs[3].toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(3));
+        assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(0).copyOfData());
+
+        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Consigned".getBytes()), result.getTransactionResult().logs.get(1).copyOfTopics().get(0));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenOwner.toByteArray()), result.getTransactionResult().logs.get(1).copyOfTopics().get(1));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenConsignee.toByteArray()), result.getTransactionResult().logs.get(1).copyOfTopics().get(2));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenIDs[4].toByteArray()), result.getTransactionResult().logs.get(1).copyOfTopics().get(3));
+        assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(0).copyOfData());
+        
+        //check consignee
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenConsignee(tokenIDs[3]));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenConsignee));
+
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenConsignee(tokenIDs[4]));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenConsignee));
+        
+        //take ownership
+        result = avmRule.call(tokenConsignee, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TakeOwnership(tokenOwner, new BigInteger[]{tokenIDs[3], tokenIDs[4]}));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        assertEquals(2, result.getTransactionResult().logs.size());
+        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Transferred".getBytes()), result.getTransactionResult().logs.get(0).copyOfTopics().get(0));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenOwner.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(1));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenConsignee.toByteArray()), result.getTransactionResult().logs.get(30).copyOfTopics().get(2));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenIDs[3].toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(3));
+        assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(0).copyOfData());
+
+        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Transferred".getBytes()), result.getTransactionResult().logs.get(1).copyOfTopics().get(0));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenOwner.toByteArray()), result.getTransactionResult().logs.get(1).copyOfTopics().get(1));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenConsignee.toByteArray()), result.getTransactionResult().logs.get(1).copyOfTopics().get(2));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenIDs[4].toByteArray()), result.getTransactionResult().logs.get(1).copyOfTopics().get(3));
+        assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(1).copyOfData());
+        
+        //token owner
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenOwner(tokenIDs[0]));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenOwner));
+
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenOwner(tokenIDs[1]));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenOwner));
+
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenOwner(tokenIDs[2]));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenOwner));
+
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenOwner(tokenIDs[3]));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenConsignee));
+
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenOwner(tokenIDs[4]));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenConsignee));
+        
+        
+        //ower balance
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040OwnerBalance(tokenOwner));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(BigInteger.valueOf(3)));
+
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040OwnerBalance(tokenConsignee));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(BigInteger.TWO));
+
+        //token at index
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenAtIndex(BigInteger.ZERO));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenIDs[0]));
+
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenAtIndex(BigInteger.ONE));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenIDs[1]));
+
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenAtIndex(BigInteger.TWO));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenIDs[2]));
+
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenAtIndex(BigInteger.valueOf(3)));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenIDs[3]));
+
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenAtIndex(BigInteger.valueOf(4)));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenIDs[4]));
+
+
+        //token for owner at index
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenForOwnerAtIndex(tokenOwner, BigInteger.ZERO));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenIDs[0]));
+
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenForOwnerAtIndex(tokenOwner, BigInteger.ONE));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenIDs[1]));
+
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenForOwnerAtIndex(tokenOwner, BigInteger.TWO));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenIDs[2]));
+
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenForOwnerAtIndex(tokenConsignee, BigInteger.ZERO));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenIDs[3]));
+
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenForOwnerAtIndex(tokenConsignee, BigInteger.ONE));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenIDs[4]));
+
+
+    }
+    
+    
 
 }

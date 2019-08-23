@@ -30,10 +30,10 @@ public class AVMBlockchainWrapper {
      * Gets a value from the key-value store of the current account at the key
      * location described by <code>realm</code> and <code>keyPath</code>.
      * 
-     * @param realm    an enum constant which qualifies the key path
-     * @param keyPath  an array of non-null byte arrays which, along with the
-     *                 <code>realm</code>, fully qualifies the storage location
-     * @return         the value from storage
+     * @param realm   an enum constant which qualifies the key path
+     * @param keyPath an array of non-null byte arrays which, along with the
+     *                <code>realm</code>, fully qualifies the storage location
+     * @return        the value from storage
      */
     public static byte[] getStorage​ByteArray(Enum realm, byte[]... keyPath) {
         byte[] serializedRealmAndKey = serializeRealmAndKey(realm, keyPath);
@@ -195,7 +195,6 @@ public class AVMBlockchainWrapper {
             keyPath
         );
     }    
-
 
     // Using approach from org.aion.avm.userlib/src/org/aion/avm/userlib/abi/ABIStreamingEncoder.java
     private static void checkLengthIsAShort(int size) {
