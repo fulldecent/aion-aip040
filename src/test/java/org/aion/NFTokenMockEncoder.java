@@ -6,7 +6,7 @@ import org.aion.avm.userlib.abi.ABIStreamingEncoder;
 
 /**
 * The methods in this class are fully described by the standard subset of the
-* ABI file ATS-1.0-SNAPSHOT.abi. In the future, tooling may automatically
+* ABI file ANFT-1.0-SNAPSHOT.abi. In the future, tooling may automatically
 * generate this file from that.
 * 
 * @see https://github.com/aionnetwork/AVM/issues/401
