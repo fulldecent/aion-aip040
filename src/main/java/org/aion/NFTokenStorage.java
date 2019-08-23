@@ -2,7 +2,6 @@ package org.aion;
 
 import avm.Address;
 import java.math.BigInteger;
-import java.util.Arrays;
 
 /**
  * The methods in this class are fully described by <code>StorageSlots</code>

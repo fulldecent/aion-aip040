@@ -158,7 +158,7 @@
             </build>
         </profile>
     </profiles>
-          <pluginRepositories>
+    <pluginRepositories>
         <pluginRepository>
             <id>sonatype-snapshots</id>
             <name>Sonatype Public</name>
