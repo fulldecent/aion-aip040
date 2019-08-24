@@ -33,7 +33,7 @@ public class AIP040Events {
      *                   destruction
      * @param tokenId    the identifier for the token which is being destroyed
      */
-    protected static void AIP040Destroyed(Address newOwner, BigInteger tokenId) {
+    protected static void AIP040Burned(Address newOwner, BigInteger tokenId) {
         Blockchain.log("AIP040Destroyed".getBytes(),
             newOwner.toByteArray(),
             encodeBigInteger32Bytes(tokenId),
