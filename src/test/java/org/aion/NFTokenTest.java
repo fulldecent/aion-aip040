@@ -252,10 +252,9 @@ public class NFTokenTest {
         AvmRule.ResultWrapper result = avmRule.call(tokenIssuer, contractAddress, BigInteger.ZERO, new ABIStreamingEncoder().encodeOneString("mint").encodeOneAddress(tokenIssuer).encodeOneBigIntegerArray(tokenIDs).toBytes());
         Assert.assertTrue(result.getReceiptStatus().isSuccess());
         assertEquals(1, result.getTransactionResult().logs.size());
-        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Transferred".getBytes()), result.getTransactionResult().logs.get(0).copyOfTopics().get(0));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Minted".getBytes()), result.getTransactionResult().logs.get(0).copyOfTopics().get(0));
         assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenIssuer.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(1));
-        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenIssuer.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(2));
-        assertArrayEquals(AIP040Events.padBigInteger32Bytes(tokenIDs[0]), result.getTransactionResult().logs.get(0).copyOfTopics().get(3));
+        assertArrayEquals(AIP040Events.padBigInteger32Bytes(tokenIDs[0]), result.getTransactionResult().logs.get(0).copyOfTopics().get(2));
         assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(0).copyOfData());
         
         //total supply
@@ -314,7 +313,7 @@ public class NFTokenTest {
         //ower balance after take from self
         result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040OwnerBalance(tokenIssuer));
         Assert.assertTrue(result.getReceiptStatus().isSuccess());
-        Assert.assertTrue(result.getDecodedReturnData().equals(BigInteger.ONE));
+        Assert.assertEquals(result.getDecodedReturnData(), BigInteger.ONE);
 
         //token at index  after take from self
         result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenAtIndex(BigInteger.ZERO));
@@ -373,7 +372,7 @@ public class NFTokenTest {
         Assert.assertTrue(result.getReceiptStatus().isSuccess());
         Assert.assertTrue(result.getDecodedReturnData().equals(tokenConsignee));
 
-        //ower balance after taken from other
+        //owner balance after taken from other
         result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040OwnerBalance(tokenIssuer));
         Assert.assertTrue(result.getReceiptStatus().isSuccess());
         Assert.assertTrue(result.getDecodedReturnData().equals(BigInteger.ZERO));
@@ -387,14 +386,13 @@ public class NFTokenTest {
         Assert.assertTrue(result.getReceiptStatus().isSuccess());
         Assert.assertTrue(result.getDecodedReturnData().equals(tokenIDs[0]));
 
-        //token for owner at index  after taken from other
-        result =  avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenForOwnerAtIndex(tokenConsignee, BigInteger.ZERO));
+        //token for owner at index after taken from other
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenForOwnerAtIndex(tokenConsignee, BigInteger.ZERO));
         Assert.assertTrue(result.getReceiptStatus().isSuccess());
         Assert.assertTrue(result.getDecodedReturnData().equals(tokenIDs[0]));
 
-        result =  avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenForOwnerAtIndex(tokenIssuer, BigInteger.ZERO));
-        Assert.assertTrue(result.getReceiptStatus().isSuccess());
-        Assert.assertTrue(result.getDecodedReturnData() == null);
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenForOwnerAtIndex(tokenIssuer, BigInteger.ZERO));
+        Assert.assertTrue(result.getReceiptStatus().isFailed());
     }
 
     @Test
@@ -491,10 +489,9 @@ public class NFTokenTest {
         AvmRule.ResultWrapper result = avmRule.call(tokenIssuer, contractAddress, BigInteger.ZERO, new ABIStreamingEncoder().encodeOneString("mint").encodeOneAddress(tokenOwner).encodeOneBigIntegerArray(tokenIDs).toBytes());
         Assert.assertTrue(result.getReceiptStatus().isSuccess());
         assertEquals(1, result.getTransactionResult().logs.size());
-        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Transferred".getBytes()), result.getTransactionResult().logs.get(0).copyOfTopics().get(0));
-        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenIssuer.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(1));
-        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenOwner.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(2));
-        assertArrayEquals(AIP040Events.padBigInteger32Bytes(tokenIDs[0]), result.getTransactionResult().logs.get(0).copyOfTopics().get(3));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Minted".getBytes()), result.getTransactionResult().logs.get(0).copyOfTopics().get(0));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenOwner.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(1));
+        assertArrayEquals(AIP040Events.padBigInteger32Bytes(tokenIDs[0]), result.getTransactionResult().logs.get(0).copyOfTopics().get(2));
         assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(0).copyOfData());
         
         //total supply
@@ -618,7 +615,7 @@ public class NFTokenTest {
         Assert.assertTrue(result.getReceiptStatus().isSuccess());
         assertEquals(1, result.getTransactionResult().logs.size());
         assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Consigned".getBytes()), result.getTransactionResult().logs.get(0).copyOfTopics().get(0));
-        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenAuhorizee.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(1));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenOwner.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(1));
         assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenConsignee.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(2));
         assertArrayEquals(AIP040Events.padBigInteger32Bytes(tokenIDs[0]), result.getTransactionResult().logs.get(0).copyOfTopics().get(3));
         assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(0).copyOfData());
@@ -674,10 +671,9 @@ public class NFTokenTest {
         AvmRule.ResultWrapper result = avmRule.call(tokenIssuer, contractAddress, BigInteger.ZERO, new ABIStreamingEncoder().encodeOneString("mint").encodeOneAddress(tokenOwner).encodeOneBigIntegerArray(tokenIDs).toBytes());
         Assert.assertTrue(result.getReceiptStatus().isSuccess());
         assertEquals(1, result.getTransactionResult().logs.size());
-        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Transferred".getBytes()), result.getTransactionResult().logs.get(0).copyOfTopics().get(0));
-        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenIssuer.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(1));
-        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenOwner.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(2));
-        assertArrayEquals(AIP040Events.padBigInteger32Bytes(tokenIDs[0]), result.getTransactionResult().logs.get(0).copyOfTopics().get(3));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Minted".getBytes()), result.getTransactionResult().logs.get(0).copyOfTopics().get(0));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenOwner.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(1));
+        assertArrayEquals(AIP040Events.padBigInteger32Bytes(tokenIDs[0]), result.getTransactionResult().logs.get(0).copyOfTopics().get(2));
         assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(0).copyOfData());
 
         //authorize
@@ -707,34 +703,29 @@ public class NFTokenTest {
         AvmRule.ResultWrapper result = avmRule.call(tokenIssuer, contractAddress, BigInteger.ZERO, new ABIStreamingEncoder().encodeOneString("mint").encodeOneAddress(tokenOwner).encodeOneBigIntegerArray(tokenIDs).toBytes());
         Assert.assertTrue(result.getReceiptStatus().isSuccess());
         assertEquals(5, result.getTransactionResult().logs.size());
-        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Transferred".getBytes()), result.getTransactionResult().logs.get(0).copyOfTopics().get(0));
-        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenIssuer.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(1));
-        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenOwner.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(2));
-        assertArrayEquals(AIP040Events.padBigInteger32Bytes(tokenIDs[0]), result.getTransactionResult().logs.get(0).copyOfTopics().get(3));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Minted".getBytes()), result.getTransactionResult().logs.get(0).copyOfTopics().get(0));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenOwner.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(1));
+        assertArrayEquals(AIP040Events.padBigInteger32Bytes(tokenIDs[0]), result.getTransactionResult().logs.get(0).copyOfTopics().get(2));
         assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(0).copyOfData());
 
-        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Transferred".getBytes()), result.getTransactionResult().logs.get(1).copyOfTopics().get(0));
-        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenIssuer.toByteArray()), result.getTransactionResult().logs.get(1).copyOfTopics().get(1));
-        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenOwner.toByteArray()), result.getTransactionResult().logs.get(1).copyOfTopics().get(2));
-        assertArrayEquals(AIP040Events.padBigInteger32Bytes(tokenIDs[1]), result.getTransactionResult().logs.get(1).copyOfTopics().get(3));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Minted".getBytes()), result.getTransactionResult().logs.get(1).copyOfTopics().get(0));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenOwner.toByteArray()), result.getTransactionResult().logs.get(1).copyOfTopics().get(1));
+        assertArrayEquals(AIP040Events.padBigInteger32Bytes(tokenIDs[1]), result.getTransactionResult().logs.get(1).copyOfTopics().get(2));
         assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(1).copyOfData());
 
-        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Transferred".getBytes()), result.getTransactionResult().logs.get(2).copyOfTopics().get(0));
-        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenIssuer.toByteArray()), result.getTransactionResult().logs.get(2).copyOfTopics().get(1));
-        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenOwner.toByteArray()), result.getTransactionResult().logs.get(2).copyOfTopics().get(2));
-        assertArrayEquals(AIP040Events.padBigInteger32Bytes(tokenIDs[2]), result.getTransactionResult().logs.get(2).copyOfTopics().get(3));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Minted".getBytes()), result.getTransactionResult().logs.get(2).copyOfTopics().get(0));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenOwner.toByteArray()), result.getTransactionResult().logs.get(2).copyOfTopics().get(1));
+        assertArrayEquals(AIP040Events.padBigInteger32Bytes(tokenIDs[2]), result.getTransactionResult().logs.get(2).copyOfTopics().get(2));
         assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(2).copyOfData());
 
-        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Transferred".getBytes()), result.getTransactionResult().logs.get(3).copyOfTopics().get(0));
-        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenIssuer.toByteArray()), result.getTransactionResult().logs.get(3).copyOfTopics().get(1));
-        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenOwner.toByteArray()), result.getTransactionResult().logs.get(3).copyOfTopics().get(2));
-        assertArrayEquals(AIP040Events.padBigInteger32Bytes(tokenIDs[3]), result.getTransactionResult().logs.get(3).copyOfTopics().get(3));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Minted".getBytes()), result.getTransactionResult().logs.get(3).copyOfTopics().get(0));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenOwner.toByteArray()), result.getTransactionResult().logs.get(3).copyOfTopics().get(1));
+        assertArrayEquals(AIP040Events.padBigInteger32Bytes(tokenIDs[3]), result.getTransactionResult().logs.get(3).copyOfTopics().get(2));
         assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(3).copyOfData());
 
-        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Transferred".getBytes()), result.getTransactionResult().logs.get(4).copyOfTopics().get(0));
-        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenIssuer.toByteArray()), result.getTransactionResult().logs.get(4).copyOfTopics().get(1));
-        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenOwner.toByteArray()), result.getTransactionResult().logs.get(4).copyOfTopics().get(2));
-        assertArrayEquals(AIP040Events.padBigInteger32Bytes(tokenIDs[4]), result.getTransactionResult().logs.get(4).copyOfTopics().get(3));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Minted".getBytes()), result.getTransactionResult().logs.get(4).copyOfTopics().get(0));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenOwner.toByteArray()), result.getTransactionResult().logs.get(4).copyOfTopics().get(1));
+        assertArrayEquals(AIP040Events.padBigInteger32Bytes(tokenIDs[4]), result.getTransactionResult().logs.get(4).copyOfTopics().get(2));
         assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(4).copyOfData());
 
         //total supply
@@ -816,7 +807,7 @@ public class NFTokenTest {
         assertEquals(2, result.getTransactionResult().logs.size());
         assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Transferred".getBytes()), result.getTransactionResult().logs.get(0).copyOfTopics().get(0));
         assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenOwner.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(1));
-        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenConsignee.toByteArray()), result.getTransactionResult().logs.get(30).copyOfTopics().get(2));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenConsignee.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(2));
         assertArrayEquals(AIP040Events.padBigInteger32Bytes(tokenIDs[3]), result.getTransactionResult().logs.get(0).copyOfTopics().get(3));
         assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(0).copyOfData());
 

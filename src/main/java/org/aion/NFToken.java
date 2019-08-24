@@ -161,7 +161,7 @@ public class NFToken {
         Blockchain.require(owner != null);
         Blockchain.require(index != null);
         Blockchain.require(index.compareTo(BigInteger.ZERO) >= 0);
-        Blockchain.require(index.compareTo(aip040TotalSupply()) < 0);
+        Blockchain.require(index.compareTo(aip040OwnerBalance(owner)) < 0);
         return NFTokenStorage.getTokensOfOwnerArray(owner, index);
     }
 
@@ -232,8 +232,10 @@ public class NFToken {
     
             AIP040Events.AIP040Transferred(currentOwner, caller, tokenId);
         }
-        NFTokenStorage.putOwnerBalance(currentOwner, fromBalance.signum() == 0 ? null : fromBalance);
-        NFTokenStorage.putOwnerBalance(caller, toBalance);
+        if (!caller.equals(currentOwner)) {
+            NFTokenStorage.putOwnerBalance(currentOwner, fromBalance.signum() == 0 ? null : fromBalance);
+            NFTokenStorage.putOwnerBalance(caller, toBalance);    
+        }
     }
 
     /**
