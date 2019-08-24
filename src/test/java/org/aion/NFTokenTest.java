@@ -894,6 +894,96 @@ public class NFTokenTest {
 
     }
     
+
+    /****************Test token ID range***************/
+    @Test
+    public void testMintMaxTokenIds() {
+        final BigInteger MAX_VALUE = new BigInteger("7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
+        final BigInteger MIN_VALUE = new BigInteger("-8000000000000000000000000000000000000000000000000000000000000000", 16);
     
+        Address tokenIssuer = avmRule.getRandomAddress(balance);
+        BigInteger[] tokenIDs = new BigInteger[]{MAX_VALUE};
+
+        //mint one token to self
+        AvmRule.ResultWrapper result = avmRule.call(tokenIssuer, contractAddress, BigInteger.ZERO, new ABIStreamingEncoder().encodeOneString("mint").encodeOneAddress(tokenIssuer).encodeOneBigIntegerArray(tokenIDs).toBytes());
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        assertEquals(1, result.getTransactionResult().logs.size());
+        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Minted".getBytes()), result.getTransactionResult().logs.get(0).copyOfTopics().get(0));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenIssuer.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(1));
+        assertArrayEquals(AIP040Events.padBigInteger32Bytes(tokenIDs[0]), result.getTransactionResult().logs.get(0).copyOfTopics().get(2));
+        assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(0).copyOfData());
+        
+        //total supply
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TotalSupply());
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(BigInteger.ONE));
+        
+        //token at index
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenAtIndex(BigInteger.ZERO));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenIDs[0]));
+    }
+
+    @Test
+    public void testMintMinTokenIds() {
+        final BigInteger MAX_VALUE = new BigInteger("7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
+        final BigInteger MIN_VALUE = new BigInteger("-8000000000000000000000000000000000000000000000000000000000000000", 16);
+    
+        Address tokenIssuer = avmRule.getRandomAddress(balance);
+        BigInteger[] tokenIDs = new BigInteger[]{MIN_VALUE};
+
+        //mint one token to self
+        AvmRule.ResultWrapper result = avmRule.call(tokenIssuer, contractAddress, BigInteger.ZERO, new ABIStreamingEncoder().encodeOneString("mint").encodeOneAddress(tokenIssuer).encodeOneBigIntegerArray(tokenIDs).toBytes());
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        assertEquals(1, result.getTransactionResult().logs.size());
+        assertArrayEquals(LogSizeUtils.truncatePadTopic("AIP040Minted".getBytes()), result.getTransactionResult().logs.get(0).copyOfTopics().get(0));
+        assertArrayEquals(LogSizeUtils.truncatePadTopic(tokenIssuer.toByteArray()), result.getTransactionResult().logs.get(0).copyOfTopics().get(1));
+        assertArrayEquals(AIP040Events.padBigInteger32Bytes(tokenIDs[0]), result.getTransactionResult().logs.get(0).copyOfTopics().get(2));
+        assertArrayEquals(new byte[0], result.getTransactionResult().logs.get(0).copyOfData());
+        
+        //total supply
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TotalSupply());
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(BigInteger.ONE));
+        
+        //token at index
+        result = avmRule.call(deployer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TokenAtIndex(BigInteger.ZERO));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        Assert.assertTrue(result.getDecodedReturnData().equals(tokenIDs[0]));
+    }
+
+    @Test
+    public void testMintTooBigTokenIds() {
+        final BigInteger MAX_VALUE = new BigInteger("7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
+        final BigInteger MIN_VALUE = new BigInteger("-8000000000000000000000000000000000000000000000000000000000000000", 16);
+    
+        Address tokenIssuer = avmRule.getRandomAddress(balance);
+        BigInteger[] tokenIDs = new BigInteger[]{MAX_VALUE.add(BigInteger.ONE)};
+
+        //mint one token to self
+        try {
+            avmRule.call(tokenIssuer, contractAddress, BigInteger.ZERO, new ABIStreamingEncoder().encodeOneString("mint").encodeOneAddress(tokenIssuer).encodeOneBigIntegerArray(tokenIDs).toBytes());            
+        } catch (Exception e) {
+            return;
+        }
+        Assert.fail(); // Expected exception
+    }    
+
+    @Test
+    public void testMintTooSmallTokenIds() {
+        final BigInteger MAX_VALUE = new BigInteger("7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
+        final BigInteger MIN_VALUE = new BigInteger("-8000000000000000000000000000000000000000000000000000000000000000", 16);
+    
+        Address tokenIssuer = avmRule.getRandomAddress(balance);
+        BigInteger[] tokenIDs = new BigInteger[]{MIN_VALUE.subtract(BigInteger.ONE)};
+
+        //mint one token to self
+        try {
+            avmRule.call(tokenIssuer, contractAddress, BigInteger.ZERO, new ABIStreamingEncoder().encodeOneString("mint").encodeOneAddress(tokenIssuer).encodeOneBigIntegerArray(tokenIDs).toBytes());            
+        } catch (Exception e) {
+            return;
+        }
+        Assert.fail(); // Expected exception
+    }    
 
 }
