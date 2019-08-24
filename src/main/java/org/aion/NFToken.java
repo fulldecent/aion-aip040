@@ -289,8 +289,10 @@ public class NFToken {
     
             AIP040Events.AIP040Transferred(currentOwner, caller, tokenId);
         //}
-        NFTokenStorage.putOwnerBalance(currentOwner, fromBalance.signum() == 0 ? null : fromBalance);
-        NFTokenStorage.putOwnerBalance(caller, toBalance);
+        if (!caller.equals(currentOwner)) {
+            NFTokenStorage.putOwnerBalance(currentOwner, fromBalance.signum() == 0 ? null : fromBalance);
+            NFTokenStorage.putOwnerBalance(caller, toBalance);    
+        }
     }
 
     /**
