@@ -2,7 +2,6 @@ package org.aion;
 
 import avm.Address;
 import java.math.BigInteger;
-import java.util.Arrays;
 
 /**
  * The methods in this class are fully described by <code>StorageSlots</code>
@@ -35,109 +34,107 @@ public class NFTokenStorage {
     }
 
     protected static String getTokenName() {
-        return new String(AVMBlockchainWrapper.getStorage​(StorageSlots.TOKEN_NAME));
+        return AVMBlockchainWrapper.getStorage​String(StorageSlots.TOKEN_NAME);
     }
 
     protected static void putTokenName(String name) {
-        AVMBlockchainWrapper.putStorage​(name.getBytes(), StorageSlots.TOKEN_NAME);
+        AVMBlockchainWrapper.putStorage​String(name, StorageSlots.TOKEN_NAME);
     }
 
     protected static String getTokenSymbol() {
-        return new String(AVMBlockchainWrapper.getStorage​(StorageSlots.TOKEN_SYMBOL));
+        return AVMBlockchainWrapper.getStorage​String(StorageSlots.TOKEN_SYMBOL);
     }
 
     protected static void putTokenSymbol(String symbol) {
-        AVMBlockchainWrapper.putStorage​(symbol.getBytes(), StorageSlots.TOKEN_SYMBOL);
+        AVMBlockchainWrapper.putStorage​String(symbol, StorageSlots.TOKEN_SYMBOL);
     }
 
     protected static String getTokenUriPrefix() {
-        return new String(AVMBlockchainWrapper.getStorage​(StorageSlots.TOKEN_URI_PREFIX));
+        return AVMBlockchainWrapper.getStorage​String(StorageSlots.TOKEN_URI_PREFIX);
     }
 
     protected static void putTokenUriPrefix(String uriPrefix) {
-        AVMBlockchainWrapper.putStorage​(uriPrefix.getBytes(), StorageSlots.TOKEN_URI_PREFIX);
+        AVMBlockchainWrapper.getStorage​String(StorageSlots.TOKEN_SYMBOL);
     }
 
     protected static String getTokenUriPostfix() {
-        return new String(AVMBlockchainWrapper.getStorage​(StorageSlots.TOKEN_URI_POSTFIX));
+        return AVMBlockchainWrapper.getStorage​String(StorageSlots.TOKEN_URI_POSTFIX);
     }
 
     protected static void putTokenUriPostfix(String uriPostfix) {
-        AVMBlockchainWrapper.putStorage​(uriPostfix.getBytes(), StorageSlots.TOKEN_URI_POSTFIX);
+        AVMBlockchainWrapper.putStorage​String(uriPostfix, StorageSlots.TOKEN_URI_POSTFIX);
     }
 
     protected static BigInteger getTotalSupply() {
-        return new BigInteger(AVMBlockchainWrapper.getStorage​(StorageSlots.TOTAL_SUPPLY));
+        return AVMBlockchainWrapper.getStorage​BigInteger(StorageSlots.TOTAL_SUPPLY);
     }
 
     protected static void putTotalSupply(BigInteger totalSupply) {
-        AVMBlockchainWrapper.putStorage​(totalSupply.toByteArray(), StorageSlots.TOTAL_SUPPLY);
+        AVMBlockchainWrapper.putStorage​BigInteger(totalSupply, StorageSlots.TOTAL_SUPPLY);
     }
 
     protected static BigInteger getTokenAtIndex(BigInteger index) {
-        return new BigInteger(AVMBlockchainWrapper.getStorage​(StorageSlots.TOKENS_ARRAY, index.toByteArray()));
+        return AVMBlockchainWrapper.getStorage​BigInteger(StorageSlots.TOKENS_ARRAY, index.toByteArray());
     }
 
     protected static void putTokenAtIndex(BigInteger index, BigInteger tokenId) {
-        AVMBlockchainWrapper.putStorage​(tokenId.toByteArray(), StorageSlots.TOKENS_ARRAY, index.toByteArray());
+        AVMBlockchainWrapper.putStorage​BigInteger(tokenId, StorageSlots.TOKENS_ARRAY, index.toByteArray());
     }
 
     protected static Address getTokenOwner(BigInteger tokenId) {
-        return new Address(AVMBlockchainWrapper.getStorage​(StorageSlots.TOKEN_OWNERS_MAP, tokenId.toByteArray()));
+        return AVMBlockchainWrapper.getStorage​Address(StorageSlots.TOKEN_OWNERS_MAP, tokenId.toByteArray());
     }
 
     protected static void putTokenOwner(BigInteger tokenId, Address owner) {
-        AVMBlockchainWrapper.putStorage​(owner.toByteArray(), StorageSlots.TOKEN_OWNERS_MAP, tokenId.toByteArray());
+        AVMBlockchainWrapper.putStorage​Address(owner, StorageSlots.TOKEN_OWNERS_MAP, tokenId.toByteArray());
     }
 
     protected static BigInteger getTokenLocation(BigInteger tokenId) {
-        return new BigInteger(AVMBlockchainWrapper.getStorage​(StorageSlots.TOKEN_LOCATION_MAP, tokenId.toByteArray()));
+        return AVMBlockchainWrapper.getStorage​BigInteger(StorageSlots.TOKEN_LOCATION_MAP, tokenId.toByteArray());
     }
 
     protected static void putTokenLocation(BigInteger tokenId, BigInteger location) {
-        AVMBlockchainWrapper.putStorage​(location.toByteArray(), StorageSlots.TOKEN_LOCATION_MAP, tokenId.toByteArray());
+        AVMBlockchainWrapper.putStorage​BigInteger(location, StorageSlots.TOKEN_LOCATION_MAP, tokenId.toByteArray());
     }
 
     protected static Address getTokenConsignee(BigInteger tokenId) {
-        return new Address(AVMBlockchainWrapper.getStorage​(StorageSlots.TOKEN_CONSIGNEE_MAP, tokenId.toByteArray()));
+        return AVMBlockchainWrapper.getStorage​Address(StorageSlots.TOKEN_CONSIGNEE_MAP, tokenId.toByteArray());
     }
 
     protected static void putTokenConsignee(BigInteger tokenId, Address consignee) {
-        AVMBlockchainWrapper.putStorage​(consignee.toByteArray(), StorageSlots.TOKEN_CONSIGNEE_MAP, tokenId.toByteArray());
+        AVMBlockchainWrapper.putStorage​Address(consignee, StorageSlots.TOKEN_CONSIGNEE_MAP, tokenId.toByteArray());
     }
 
     protected static boolean getAccountAuthorization(Address owner, Address authorizee) {
-        return byteArrayToBoolean(AVMBlockchainWrapper.getStorage​(StorageSlots.ACCOUNT_AUTHORIZATION_MAP, owner.toByteArray(), authorizee.toByteArray()));
+        return AVMBlockchainWrapper.getStorage​Boolean(
+            StorageSlots.ACCOUNT_AUTHORIZATION_MAP,
+            owner.toByteArray(),
+            authorizee.toByteArray()
+        );
     }
 
     protected static void putAccountAuthorization(Address owner, Address authorizee, boolean authorized) {
-        AVMBlockchainWrapper.putStorage​(booleanToByteArray(authorized), StorageSlots.ACCOUNT_AUTHORIZATION_MAP, owner.toByteArray(), authorizee.toByteArray());
+        AVMBlockchainWrapper.putStorage​Boolean(
+            authorized,
+            StorageSlots.ACCOUNT_AUTHORIZATION_MAP,
+            owner.toByteArray(),
+            authorizee.toByteArray()
+        );
     }
 
     protected static BigInteger getOwnerBalance(Address owner) {
-        return new BigInteger(AVMBlockchainWrapper.getStorage​(StorageSlots.OWNER_BALANCE_MAP, owner.toByteArray()));
+        return AVMBlockchainWrapper.getStorage​BigInteger(StorageSlots.OWNER_BALANCE_MAP, owner.toByteArray());
     }
 
     protected static void putOwnerBalance(Address owner, BigInteger balance) {
-        AVMBlockchainWrapper.putStorage​(balance.toByteArray(), StorageSlots.OWNER_BALANCE_MAP, owner.toByteArray());
+        AVMBlockchainWrapper.putStorage​BigInteger(balance, StorageSlots.OWNER_BALANCE_MAP, owner.toByteArray());
     }
 
     protected static BigInteger getTokensOfOwnerArray(Address owner, BigInteger index) {
-        return new BigInteger(AVMBlockchainWrapper.getStorage​(StorageSlots.TOKENS_OF_OWNER_ARRAY, owner.toByteArray(), index.toByteArray()));
+        return AVMBlockchainWrapper.getStorage​BigInteger(StorageSlots.TOKENS_OF_OWNER_ARRAY, owner.toByteArray(), index.toByteArray());
     }
 
     protected static void putTokensOfOwnerArray(Address owner, BigInteger index, BigInteger tokenId) {
-        AVMBlockchainWrapper.putStorage​(tokenId.toByteArray(), StorageSlots.TOKENS_OF_OWNER_ARRAY, owner.toByteArray(), index.toByteArray());
-    }
-
-    private static final byte[] byteArrayTrue = {0x1};
-    private static final byte[] byteArrayFalse = {0x0};
-
-    private static boolean byteArrayToBoolean(byte[] inputByteArray) {
-        return Arrays.equals(inputByteArray, byteArrayTrue);
-    }
-
-    private static byte[] booleanToByteArray(boolean inputBool) {
-        return inputBool ? byteArrayTrue : byteArrayFalse;
+        AVMBlockchainWrapper.putStorage​BigInteger(tokenId, StorageSlots.TOKENS_OF_OWNER_ARRAY, owner.toByteArray(), index.toByteArray());
     }
 }

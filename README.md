@@ -80,7 +80,8 @@ To incorporate non-fungible tokens into your contract, which may have other feat
 - Setting up a Java + Maven + JUnit + Aion project layout
   - Best practice for Java+Maven+JUnit project layout https://github.com/junit-team/junit5-samples/tree/master/junit5-jupiter-starter-maven
   - How to remove Maven initialization errors https://stackoverflow.com/questions/4123044/maven-3-warnings-about-build-plugins-plugin-version
-  - pom.xml for AVM Maven projects https://github.com/satran004/avm-samples/blob/master/SumContract-spock-sample/pom.xml
+  - pom.xml for AVM Maven projects https://github.com/satran004/avm-samples/blob/master/HelloAvm/pom.xml
+  - Gitignore for Maven projects ("should I include jars?") https://github.com/fulldecent/aion-aip040/issues/25
 - Gitignore from https://github.com/github/gitignore/blob/master/Maven.gitignore
 - Editorconfig is included and some rules are referenced to Google Java Style Guide
 
@@ -93,7 +94,12 @@ To incorporate non-fungible tokens into your contract, which may have other feat
   ```
 
 * Periodically update mvnw if necessary. We recognize upstream as https://github.com/takari/maven-wrapper
-* Periodically review AVM and other Maven dependencies and update if necessary. TODO: document how to do this. [Issue #27](https://github.com/fulldecent/aion-aip040/issues/27)
+
+* Periodically review AVM and other Maven dependencies and update if necessary:
+
+  ```sh
+  mvn aion4j:init -DforceCopy
+  ```
 
 ## License
 

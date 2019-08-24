@@ -3,28 +3,63 @@ package org.aion;
 import avm.Address;
 import avm.Blockchain;
 import java.math.BigInteger;
+import org.aion.avm.userlib.AionBuffer;
+//import org.aion.avm.core.util;
 
 public class AIP040Events {
+
+    /**
+     * Log event for creating a token
+     * 
+     * @apiSpec          This event must be emitted for each token created.
+     * @apiSpec          The tokenId is padded to 32-bytes using signed padding.
+     * @param newOwner   the account that is the owner of the token after the
+     *                   creation
+     * @param tokenId    the identifier for the token which is being created
+     */
+    protected static void AIP040Minted(Address newOwner, BigInteger tokenId) {
+        Blockchain.log("AIP040Minted".getBytes(),
+            newOwner.toByteArray(),
+            padBigInteger32Bytes(tokenId),
+            new byte[0]);
+    }
+
+    /**
+     * Log event for burning a token
+     * 
+     * @apiSpec          This event must be emitted for each token destroyed.
+     * @apiSpec          The tokenId is padded to 32-bytes using signed padding.
+     * @param newOwner   the account that is the owner of the token after the
+     *                   destruction
+     * @param tokenId    the identifier for the token which is being destroyed
+     */
+    protected static void AIP040Burned(Address newOwner, BigInteger tokenId) {
+        Blockchain.log("AIP040Burned".getBytes(),
+            newOwner.toByteArray(),
+            padBigInteger32Bytes(tokenId),
+            new byte[0]);
+    }
+
     /**
      * Log event for transferring a token
      * 
      * @apiSpec          When a token is transferred, the consignee is also
      *                   implicitly unset (i.e. set to null).
      * @apiSpec          This event must be emitted for each token transferred,
-     *                   minted or burned, even if the transfer was a result
-     *                   of other than <code>aip040TakeOwnership</code>.
+     *                   even if the transfer was a result of other than
+     *                   <code>aip040TakeOwnership</code>.
+     * @apiSpec          The tokenId is padded to 32-bytes using signed padding.
      * @param priorOwner the account that was the owner of the token before
-     *                   transfer (or null if token is being created)
+     *                   transfer
      * @param newOwner   the account that is the owner of the token after the
-     *                   transfer (or null if token is being destroyed)
-     * @param tokenId    the identifier for the token which is being
-     *                   transferred, created or destroyed
+     *                   transfer
+     * @param tokenId    the identifier for the token which is being transferred
      */
     protected static void AIP040Transferred(Address priorOwner, Address newOwner, BigInteger tokenId) {
         Blockchain.log("AIP040Transferred".getBytes(),
-            priorOwner.toByteArray(),
-            newOwner.toByteArray(),
-            tokenId.toByteArray(),
+            priorOwner == null ? null : priorOwner.toByteArray(),
+            newOwner == null ? null : newOwner.toByteArray(),
+            padBigInteger32Bytes(tokenId),
             new byte[0]);
     }
 
@@ -40,6 +75,7 @@ public class AIP040Events {
      *                  transfers fire the transfer log event. Therefore, also
      *                  firing the consignee log event at that time would be
      *                  unhelpfully duplicative.
+     * @apiSpec         The tokenId is padded to 32-bytes using signed padding.
      * @param owner     the current owner of the token which is being consigned
      * @param consignee the consignee being assigned to the token (or null if
      *                  consignment is being revoked)
@@ -50,7 +86,7 @@ public class AIP040Events {
         Blockchain.log("AIP040Consigned".getBytes(),
             owner.toByteArray(),
             consignee.toByteArray(),
-            tokenId.toByteArray(),
+            padBigInteger32Bytes(tokenId),
             new byte[0]);
     }
 
@@ -80,5 +116,13 @@ public class AIP040Events {
             account.toByteArray(),
             priorAuthorizee.toByteArray(),
             new byte[0]);
+    }
+
+    // Aion will truncate + pad log topics to 32 bytes, this makes negative
+    // BigIntegers smaller than 32 bytes indistinguishable from similar positive
+    // integers which are similar (MOD 2^bits).
+    //TODO: Add reference, this may be unspecified Aion behavior
+    public static byte[] padBigInteger32Bytes(BigInteger input) {
+        return AionBuffer.allocate(/*LogSizeUtils.TOPIC_SIZE*/ 32).put32ByteInt(input).getArray();
     }
 }

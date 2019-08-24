@@ -4,7 +4,7 @@
 root = true
 
 [*.java]
-indent_size = 2 # https://google.github.io/styleguide/javaguide.html#s4.2-block-indentation
+indent_size = 4 # Conflict with https://google.github.io/styleguide/javaguide.html#s4.2-block-indentation
 indent_style = space
 charset = utf-8
 end_of_line = lf

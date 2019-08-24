@@ -72,7 +72,7 @@ public class AIP040Encoder {
     public static byte[] aip040TokenAtIndex(BigInteger index) {
         return new ABIStreamingEncoder()
         .encodeOneString("aip040TokenAtIndex")
-        .encodeOneByteArray(index.toByteArray())
+        .encodeOneBigInteger(index)
         .toBytes();
     }
 
@@ -80,7 +80,7 @@ public class AIP040Encoder {
         return new ABIStreamingEncoder()
         .encodeOneString("aip040TokenForOwnerAtIndex")
         .encodeOneAddress(owner)
-        .encodeOneByteArray(index.toByteArray())
+        .encodeOneBigInteger(index)
         .toBytes();
     }
 

@@ -3,10 +3,11 @@ package org.aion;
 import avm.Address;
 import avm.Blockchain;
 import java.math.BigInteger;
+import java.security.acl.Owner;
 
 /**
  * This mock class includes additional functionality which will be useful for
- * some, if not all, AIP #040 implementations. This functionality is not
+ * some, if not all, AIP-040 implementations. This functionality is not
  * standardized so it is not included in the <code>NFToken</code> class.
  */
 public class NFTokenMock extends NFToken {
@@ -22,12 +23,12 @@ public class NFTokenMock extends NFToken {
      * @param    tokenUriPrefix  this will be used in aip040TokenUri
      * @param    tokenUriPostfix this will be used in aip040TokenUri
      */
-     
-      public static void setTokenNameSymbolAndUriAffixes(String tokenName, String tokenSymbol, String uriPrefix, String uriPostfix) {
-//        Blockchain.require(tokenName != null);
-//        Blockchain.require(tokenSymbol != null);
-//        Blockchain.require(uriPrefix != null);
-//        Blockchain.require(uriPostfix != null);
+    // @NotCallable
+    public static void setTokenNameSymbolAndUriAffixes(String tokenName, String tokenSymbol, String uriPrefix, String uriPostfix) {
+        Blockchain.require(tokenName != null);
+        Blockchain.require(tokenSymbol != null);
+        Blockchain.require(uriPrefix != null);
+        Blockchain.require(uriPostfix != null);
         NFTokenStorage.putTokenName(tokenName);
         NFTokenStorage.putTokenSymbol(tokenSymbol);
         NFTokenStorage.putTokenUriPrefix(uriPrefix);
@@ -43,24 +44,31 @@ public class NFTokenMock extends NFToken {
     public static void mint(Address newOwner, BigInteger[] tokenIds) {
         Blockchain.require(newOwner != null);
         Blockchain.require(tokenIds != null);
-
         BigInteger toBalance = aip040OwnerBalance(newOwner);
+        BigInteger totalSupply = aip040TotalSupply();
 
         for (BigInteger tokenId : tokenIds) {
             Blockchain.require(aip040TokenOwner(tokenId) == null);
-            assert tokenId != null; // Confirmed on previous line
-            BigInteger totalSupply = aip040TotalSupply();
+            // assert tokenId != null; // Confirmed on previous line
             NFTokenStorage.putTokenAtIndex(totalSupply, tokenId);
-            totalSupply = totalSupply.add(BigInteger.ONE);
-            NFTokenStorage.putTotalSupply(totalSupply);
-
+            if (totalSupply == null) {
+                totalSupply = BigInteger.ONE;
+            } else {
+                totalSupply = totalSupply.add(BigInteger.ONE);
+            } 
+            
             // Add to new owner array, O(1) algorithm
             NFTokenStorage.putTokensOfOwnerArray(newOwner, toBalance, tokenId);
             NFTokenStorage.putTokenLocation(tokenId, toBalance);
-            toBalance = toBalance.add(BigInteger.ONE);
-    
-            AIP040Events.AIP040Transferred(null, newOwner, tokenId);
+            if (toBalance == null) {
+                toBalance = BigInteger.ONE;
+            } else {
+                toBalance = toBalance.add(BigInteger.ONE);
+            }
+            NFTokenStorage.putTokenOwner(tokenId, newOwner);
+            AIP040Events.AIP040Minted(newOwner, tokenId);
         }
+        NFTokenStorage.putTotalSupply(totalSupply);
         NFTokenStorage.putOwnerBalance(newOwner, toBalance);
     }
 }
