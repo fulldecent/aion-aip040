@@ -957,6 +957,7 @@ public class NFTokenTest {
         final BigInteger MAX_VALUE = new BigInteger("7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
         final BigInteger MIN_VALUE = new BigInteger("-8000000000000000000000000000000000000000000000000000000000000000", 16);
     
+<<<<<<< HEAD
         Address tokenIssuer = avmRule.getRandomAddress(balance);
         BigInteger[] tokenIDs = new BigInteger[]{MAX_VALUE.add(BigInteger.ONE)};
 
@@ -1018,4 +1019,41 @@ public class NFTokenTest {
 
     }
    
+=======
+    
+    /***********Energy Test**************/
+    @Test
+    public void testMintOneTokenToSelfAndTakeOwnerShipAndConsignWithArray() {
+        Address tokenIssuer = avmRule.getRandomAddress(balance);
+        Address tokenConsignee = avmRule.getRandomAddress(balance);
+        BigInteger[] tokenIDs = new BigInteger[]{BigInteger.valueOf(333), BigInteger.valueOf(666)};
+        
+        //mint one token to self
+        AvmRule.ResultWrapper result = avmRule.call(tokenIssuer, contractAddress, BigInteger.ZERO, new ABIStreamingEncoder().encodeOneString("mint").encodeOneAddress(tokenIssuer).encodeOneBigIntegerArray(tokenIDs).toBytes());
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        System.out.println("Energy cost for minting two token using array: " + result.getTransactionResult().energyUsed);
+       
+        //consign 
+        result = avmRule.call(tokenIssuer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040Consign(tokenIssuer,tokenConsignee,tokenIDs));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        System.out.println("Energy cost for consigning two token using array: " + result.getTransactionResult().energyUsed);
+
+        //take ownership 
+        result =  avmRule.call(tokenConsignee, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TakeOwnership(tokenIssuer,new BigInteger[]{BigInteger.valueOf(333)}));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        System.out.println("Energy cost for taking one token using array: " + result.getTransactionResult().energyUsed);
+
+        result =  avmRule.call(tokenConsignee, contractAddress, BigInteger.ZERO,  new ABIStreamingEncoder()
+            .encodeOneString("aip040TakeOneOwnership")
+            .encodeOneAddress(tokenIssuer)
+            .encodeOneBigInteger(tokenIDs[1])
+            .toBytes());
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+        System.out.println("Energy cost for taking one token without using array: " + result.getTransactionResult().energyUsed);
+
+    }
+    
+    
+
+>>>>>>> 9028167f00746480059f8b0e9a70dbfa816bf6c8
 }
