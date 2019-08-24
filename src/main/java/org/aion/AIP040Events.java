@@ -20,7 +20,7 @@ public class AIP040Events {
     protected static void AIP040Minted(Address newOwner, BigInteger tokenId) {
         Blockchain.log("AIP040Minted".getBytes(),
             newOwner.toByteArray(),
-            encodeBigInteger32Bytes(tokenId),
+            padBigInteger32Bytes(tokenId),
             new byte[0]);
     }
 
@@ -36,7 +36,7 @@ public class AIP040Events {
     protected static void AIP040Burned(Address newOwner, BigInteger tokenId) {
         Blockchain.log("AIP040Burned".getBytes(),
             newOwner.toByteArray(),
-            encodeBigInteger32Bytes(tokenId),
+            padBigInteger32Bytes(tokenId),
             new byte[0]);
     }
 
@@ -59,7 +59,7 @@ public class AIP040Events {
         Blockchain.log("AIP040Transferred".getBytes(),
             priorOwner == null ? null : priorOwner.toByteArray(),
             newOwner == null ? null : newOwner.toByteArray(),
-            encodeBigInteger32Bytes(tokenId),
+            padBigInteger32Bytes(tokenId),
             new byte[0]);
     }
 
@@ -86,7 +86,7 @@ public class AIP040Events {
         Blockchain.log("AIP040Consigned".getBytes(),
             owner.toByteArray(),
             consignee.toByteArray(),
-            encodeBigInteger32Bytes(tokenId),
+            padBigInteger32Bytes(tokenId),
             new byte[0]);
     }
 
@@ -122,7 +122,7 @@ public class AIP040Events {
     // BigIntegers smaller than 32 bytes indistinguishable from similar positive
     // integers which are similar (MOD 2^bits).
     //TODO: Add reference, this may be unspecified Aion behavior
-    private static byte[] encodeBigInteger32Bytes(BigInteger input) {
+    public static byte[] padBigInteger32Bytes(BigInteger input) {
         return AionBuffer.allocate(/*LogSizeUtils.TOPIC_SIZE*/ 32).put32ByteInt(input).getArray();
     }
 }
