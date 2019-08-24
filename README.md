@@ -81,6 +81,7 @@ To incorporate non-fungible tokens into your contract, which may have other feat
   - Best practice for Java+Maven+JUnit project layout https://github.com/junit-team/junit5-samples/tree/master/junit5-jupiter-starter-maven
   - How to remove Maven initialization errors https://stackoverflow.com/questions/4123044/maven-3-warnings-about-build-plugins-plugin-version
   - pom.xml for AVM Maven projects https://github.com/satran004/avm-samples/blob/master/HelloAvm/pom.xml
+  - Gitignore for Maven projects ("should I include jars?") https://github.com/fulldecent/aion-aip040/issues/25
 - Gitignore from https://github.com/github/gitignore/blob/master/Maven.gitignore
 - Editorconfig is included and some rules are referenced to Google Java Style Guide
 
