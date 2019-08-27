@@ -20,7 +20,7 @@ public class NFTokenTest {
 
 
     @Rule
-    public AvmRule avmRule = new AvmRule(true);
+    public AvmRule avmRule = new AvmRule(false);
 
     // The default address is preloaded with some energy
     private Address deployer =  avmRule.getPreminedAccount();
