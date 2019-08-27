@@ -988,7 +988,7 @@ public class NFTokenTest {
 
     /***********Energy Test**************/
     @Test
-    public void testMintOneTokenToSelfAndTakeOwnerShipAndConsignWithArray() {
+    public void energyTest1() {
         Address tokenIssuer = avmRule.getRandomAddress(balance);
         Address tokenConsignee = avmRule.getRandomAddress(balance);
         BigInteger[] tokenIDs = new BigInteger[]{BigInteger.valueOf(333), BigInteger.valueOf(666)};
@@ -997,17 +997,48 @@ public class NFTokenTest {
         AvmRule.ResultWrapper result = avmRule.call(tokenIssuer, contractAddress, BigInteger.ZERO, new ABIStreamingEncoder().encodeOneString("mint").encodeOneAddress(tokenIssuer).encodeOneBigIntegerArray(tokenIDs).toBytes());
         Assert.assertTrue(result.getReceiptStatus().isSuccess());
         System.out.println("Energy cost for minting two token using array: " + result.getTransactionResult().energyUsed);
-       
+
         //consign 
         result = avmRule.call(tokenIssuer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040Consign(tokenIssuer,tokenConsignee,tokenIDs));
         Assert.assertTrue(result.getReceiptStatus().isSuccess());
         System.out.println("Energy cost for consigning two token using array: " + result.getTransactionResult().energyUsed);
+    }
+
+    @Test
+    public void energyTest2() {
+        Address tokenIssuer = avmRule.getRandomAddress(balance);
+        Address tokenConsignee = avmRule.getRandomAddress(balance);
+        BigInteger[] tokenIDs = new BigInteger[]{BigInteger.valueOf(333), BigInteger.valueOf(666)};
+        
+        //mint one token to self
+        AvmRule.ResultWrapper result = avmRule.call(tokenIssuer, contractAddress, BigInteger.ZERO, new ABIStreamingEncoder().encodeOneString("mint").encodeOneAddress(tokenIssuer).encodeOneBigIntegerArray(tokenIDs).toBytes());
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+       
+        //consign 
+        result = avmRule.call(tokenIssuer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040Consign(tokenIssuer,tokenConsignee,tokenIDs));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
 
         //take ownership 
-        result =  avmRule.call(tokenConsignee, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TakeOwnership(tokenIssuer,new BigInteger[]{BigInteger.valueOf(333)}));
+        result =  avmRule.call(tokenConsignee, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040TakeOwnership(tokenIssuer,new BigInteger[]{tokenIDs[1]}));
         Assert.assertTrue(result.getReceiptStatus().isSuccess());
         System.out.println("Energy cost for taking one token using array: " + result.getTransactionResult().energyUsed);
+    }
 
+    @Test
+    public void energyTest3() {
+        Address tokenIssuer = avmRule.getRandomAddress(balance);
+        Address tokenConsignee = avmRule.getRandomAddress(balance);
+        BigInteger[] tokenIDs = new BigInteger[]{BigInteger.valueOf(333), BigInteger.valueOf(666)};
+        
+        //mint one token to self
+        AvmRule.ResultWrapper result = avmRule.call(tokenIssuer, contractAddress, BigInteger.ZERO, new ABIStreamingEncoder().encodeOneString("mint").encodeOneAddress(tokenIssuer).encodeOneBigIntegerArray(tokenIDs).toBytes());
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+       
+        //consign 
+        result = avmRule.call(tokenIssuer, contractAddress, BigInteger.ZERO, AIP040Encoder.aip040Consign(tokenIssuer,tokenConsignee,tokenIDs));
+        Assert.assertTrue(result.getReceiptStatus().isSuccess());
+
+        //take ownership 
         result =  avmRule.call(tokenConsignee, contractAddress, BigInteger.ZERO,  new ABIStreamingEncoder()
             .encodeOneString("aip040TakeOneOwnership")
             .encodeOneAddress(tokenIssuer)
@@ -1015,6 +1046,5 @@ public class NFTokenTest {
             .toBytes());
         Assert.assertTrue(result.getReceiptStatus().isSuccess());
         System.out.println("Energy cost for taking one token without using array: " + result.getTransactionResult().energyUsed);
-
     }
 }
