@@ -239,63 +239,6 @@ public class NFToken {
     }
 
     /**
-     * ⚠️⚠️⚠️ WARNING ⚠️⚠️⚠️
-     * @deprecated This is only for temporarily testing the energy saving of
-     * moving one token versus moving an array (which contains one token)
-     * 
-     * TODO: Remove this during AIP process.
-     */
-    @Deprecated
-    public static void aip040TakeOwnership(Address currentOwner, BigInteger tokenId) {
-        Blockchain.require(currentOwner != null);
-        //Blockchain.require(tokenIds != null);
-        Address caller = Blockchain.getCaller();
-
-        BigInteger fromBalance = NFToken.aip040OwnerBalance(currentOwner);
-        BigInteger toBalance = NFToken.aip040OwnerBalance(caller);
-        boolean isAuthorized = caller.equals(currentOwner) || aip040OwnerDoesAuthorize(currentOwner, caller);
-
-        //for (BigInteger tokenId : tokenIds) {
-            Blockchain.require(aip040TokenOwner(tokenId).equals(currentOwner));
-            // assert tokenId != null; // aip040TokenOwner throws if tokenId is null
-            Blockchain.require(isAuthorized || aip040TokenConsignee(tokenId).equals(caller));
-            NFTokenStorage.putTokenConsignee(tokenId, null);
-            NFTokenStorage.putTokenOwner(tokenId, caller);
-
-            // General O(1) algorithm to remove an item from an ordered array:
-            //   1. Know where the value because it is indexed
-            //   2. Copy the last item over the value to be removed
-            //   3. Shrink the array
-
-            // Remove from old owner array, O(1) algorithm
-            BigInteger tokenToRemoveLocation = NFTokenStorage.getTokenLocation(tokenId);
-            BigInteger lastTokenLocation = fromBalance.subtract(BigInteger.ONE);
-            if (!lastTokenLocation.equals(tokenToRemoveLocation)) {
-                BigInteger lastToken = NFTokenStorage.getTokensOfOwnerArray(currentOwner, lastTokenLocation);
-                NFTokenStorage.putTokensOfOwnerArray(currentOwner, tokenToRemoveLocation, lastToken);
-                NFTokenStorage.putTokenLocation(tokenId, tokenToRemoveLocation);
-            }
-            fromBalance = fromBalance.subtract(BigInteger.ONE);
-
-            // Add to new owner array, O(1) algorithm
-            NFTokenStorage.putTokensOfOwnerArray(caller, toBalance, tokenId);
-            NFTokenStorage.putTokenLocation(tokenId, toBalance);
-            NFTokenStorage.putTokenOwner(tokenId, caller);
-            if (toBalance == null) {
-                toBalance = BigInteger.ONE;
-            } else {
-                toBalance = toBalance.add(BigInteger.ONE);
-            }
-    
-            AIP040Events.AIP040Transferred(currentOwner, caller, tokenId);
-        //}
-        if (!caller.equals(currentOwner)) {
-            NFTokenStorage.putOwnerBalance(currentOwner, fromBalance.signum() == 0 ? null : fromBalance);
-            NFTokenStorage.putOwnerBalance(caller, toBalance);    
-        }
-    }
-
-    /**
      * Consigns specified tokens to an account, or revokes an existing
      * consignment. Reverts if not permitted. Permission is specified iff the
      * caller is the token owner or the owner does authorize the caller.
@@ -324,31 +267,6 @@ public class NFToken {
             NFTokenStorage.putTokenConsignee(tokenId, consignee);
             AIP040Events.AIP040Consigned(owner, consignee, tokenId);    
         }
-    }
-
-    /**
-     * ⚠️⚠️⚠️ WARNING ⚠️⚠️⚠️
-     * @deprecated This is only for temporarily testing the energy saving of
-     * moving one token versus moving an array (which contains one token)
-     * 
-     * TODO: Remove this during AIP process.
-     */
-    @Deprecated
-    public static void aip040Consign(Address owner, Address consignee, BigInteger tokenId) {
-        Blockchain.require(owner != null);
-        //Blockchain.require(tokenIds != null);
-        Address caller = Blockchain.getCaller();
-        Blockchain.require(
-            caller.equals(owner) ||
-            aip040OwnerDoesAuthorize(owner, caller)
-        );
-
-        //for (BigInteger tokenId : tokenIds) {
-            Blockchain.require(aip040TokenOwner(tokenId).equals(owner));
-            // assert tokenId != null; // aip040TokenOwner throws if tokenId is null
-            NFTokenStorage.putTokenConsignee(tokenId, consignee);
-            AIP040Events.AIP040Consigned(owner, consignee, tokenId);    
-        //}
     }
 
     /**

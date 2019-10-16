@@ -89,18 +89,6 @@ public class Main {
         NFTokenMock.aip040TakeOwnership(currentOwner, tokenIds);
     }
 
-    /**
-     * ⚠️⚠️⚠️ WARNING ⚠️⚠️⚠️
-     * @deprecated This is only for temporarily testing the energy saving of
-     * moving one token versus moving an array (which contains one token)
-     *
-     * TODO: Remove this during AIP process.
-     */
-    @Callable
-    public static void aip040TakeOneOwnership(Address currentOwner, BigInteger tokenId) {
-        NFTokenMock.aip040TakeOwnership(currentOwner, tokenId);
-    }
-    
     @Callable
     public static void aip040Consign(Address owner, Address consignee, BigInteger[] tokenIds) {
         NFTokenMock.aip040Consign(owner, consignee, tokenIds);
