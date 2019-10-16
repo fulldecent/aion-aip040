@@ -228,7 +228,7 @@ public class AVMBlockchainWrapper {
         // each other. https://github.com/aionnetwork/AVM/wiki/Hash-Code
         buffer.putInt(realm.hashCode());
         for (byte[] keyPathItem : keyPath) {
-            buffer.putShort((short) keyPathItem.length); // because [[a], [b]] ± [[a, b]]
+            buffer.putShort((short) keyPathItem.length); // because [[a], [b]] ≠ [[a, b]]
             buffer.put(keyPathItem);
         }
         return buffer.getArray();
